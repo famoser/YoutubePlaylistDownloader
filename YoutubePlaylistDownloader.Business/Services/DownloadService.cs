@@ -12,7 +12,7 @@ namespace YoutubePlaylistDownloader.Business.Services
 {
     public class DownloadService : SingletonBase<DownloadService>
     {
-        public async Task<bool> DownloadYoutubeVideo(VideoModel vm, string folder)
+        public async Task<bool> DownloadYoutubeVideo(VideoModel vm, string folder, ProgressModel pm)
         {
             IEnumerable<VideoInfo> videoInfos = DownloadUrlResolver.GetDownloadUrls(vm.Link);
 
@@ -41,10 +41,6 @@ namespace YoutubePlaylistDownloader.Business.Services
 
             // Register the progress events. We treat the download progress as 85% of the progress and the extraction progress only as 15% of the progress,
             // because the download will take much longer than the audio extraction.
-            var pm = new ProgressModel()
-            {
-                Description = "Downloading " + vm.Name
-            };
             audioDownloader.DownloadProgressChanged += (sender, args) => SimpleIoc.Default.GetInstance<IProgressService>().SetProgress(pm, (int)(args.ProgressPercentage * 0.85));
             audioDownloader.AudioExtractionProgressChanged += (sender, args) => SimpleIoc.Default.GetInstance<IProgressService>().SetProgress(pm, (int)(args.ProgressPercentage * 0.15));
 

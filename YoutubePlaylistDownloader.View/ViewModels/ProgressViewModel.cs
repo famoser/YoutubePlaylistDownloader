@@ -68,10 +68,7 @@ namespace YoutubePlaylistDownloader.View.ViewModels
             if (_percentageProgressModels.ContainsKey(pm))
             {
                 _percentageProgressModels.Remove(pm);
-                if (_percentageProgressModels.Count > 0)
-                {
-                    ActiveModel = _percentageProgressModels.First().Key;
-                }
+                ActiveModel = _percentageProgressModels.Count > 0 ? _percentageProgressModels.First().Key : null;
             }
         }
     }

@@ -22,6 +22,12 @@
                     <TextBlock Grid.Column="1" Text="{Binding TotalVideos}" />
                 </Grid>
             </DataTemplate>
+
+            <DataTemplate x:Key="Mp3FileDataTemplate" DataType="models:Mp3Model">
+                <Grid>
+                    <TextBlock Grid.Column="0" Text="{Binding OriginalTitle}" />
+                </Grid>
+            </DataTemplate>
         </ResourceDictionary>
   </Application.Resources>
 </Application>
