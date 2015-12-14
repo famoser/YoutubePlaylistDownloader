@@ -5,10 +5,67 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:YoutubePlaylistDownloader"
         mc:Ignorable="d"
-        Title="MainWindow" Height="350" Width="525"
+        Title="MainWindow"
         DataContext="{Binding MainPageViewModel, Source={StaticResource Locator}}">
-    
-    <Grid>
-        <Button Command="{Binding StartDownloadCommand}" Content="Start Download" />
+
+    <Grid Margin="10,0,10,10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <StackPanel Grid.Row="0">
+            <TextBlock Text="Configuration" Style="{StaticResource TitelStyle}" />
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="20" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <TextBlock Grid.Column="0" Grid.Row="0" Text="Target Folder" />
+                <TextBlock Grid.Column="1" Grid.Row="0" Text="Temp Folder" />
+                <TextBox Grid.Row="1" Grid.Column="0" Text="{Binding TargetFolder, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding TempFolder, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                <Button Grid.Row="1" Grid.Column="3" Command="{Binding GetPlaylistsCommand}" Content="Check Playlists" />
+                <Button Grid.Row="0" Grid.Column="3" Command="{Binding SaveStateCommand}" Content="Save Configuration" />
+            </Grid>
+        </StackPanel>
+        <Grid Grid.Row="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <TextBlock Grid.Row="0" Text="Playlists" Style="{StaticResource TitelStyle}" />
+            <ListView Grid.Row="1" ItemsSource="{Binding Playlists}" SelectionMode="Multiple" ItemTemplate="{StaticResource PlaylistDataTemplate}" >
+                <ListBox.ItemContainerStyle>
+                    <Style TargetType="{x:Type ListBoxItem}">
+                        <Setter Property="IsSelected" Value="{Binding Mode=TwoWay, Path=Download}" />
+                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                    </Style>
+                </ListBox.ItemContainerStyle>
+            </ListView>
+
+            <Button Grid.Row="2" Command="{Binding StartDownloadCommand}" Content="Start Download" />
+        </Grid>
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="154*"/>
+                <ColumnDefinition Width="31*"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <TextBlock Grid.Row="0" Text="Progress" Style="{StaticResource TitelStyle}" Grid.ColumnSpan="2" />
+            <TextBlock Grid.Row="1" Text="{Binding ProgressViewModel.ProgressMessage, Source={StaticResource Locator}}" FontSize="20" Grid.ColumnSpan="2" />
+            <ProgressBar Grid.Row="2" Maximum="100" Minimum="0" Value="{Binding ProgressViewModel.ActiveProgress, Source={StaticResource Locator}, Mode=OneTime}" IsIndeterminate="False" Height="30" Grid.ColumnSpan="2" />
+        </Grid>
     </Grid>
 </Window>

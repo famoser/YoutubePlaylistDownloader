@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Florianalexandermoser.Common.Patterns.Singleton
+﻿namespace Florianalexandermoser.Common.Patterns.Singleton
 {
     /// <summary>
     /// Represents a Singleton stored in SingletonManager

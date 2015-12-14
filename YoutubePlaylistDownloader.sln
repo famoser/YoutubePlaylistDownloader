@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YoutubePlaylistDownloader.B
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Florianalexandermoser.Common", "Florianalexandermoser.Common\Florianalexandermoser.Common.csproj", "{F02C8BFF-8D32-47C9-8DB3-0F0BB1DBA2F2}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Libs", "Libs", "{7595A850-05E0-4828-A5BF-00B8B3086ED5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -36,5 +38,10 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{8BD8E064-2A11-47B9-BC64-98F198AE2E2D} = {7595A850-05E0-4828-A5BF-00B8B3086ED5}
+		{C52E6BC5-19A0-4A5B-A71D-7F3CBEF4EB95} = {7595A850-05E0-4828-A5BF-00B8B3086ED5}
+		{F02C8BFF-8D32-47C9-8DB3-0F0BB1DBA2F2} = {7595A850-05E0-4828-A5BF-00B8B3086ED5}
 	EndGlobalSection
 EndGlobal

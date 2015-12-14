@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace YoutubePlaylistDownloader.Business.Models
+﻿namespace YoutubePlaylistDownloader.Business.Models
 {
-    public class PlaylistModel
+    public class PlaylistModel : BaseModel
     {
         public string Id { get; set; }
         public string Name { get; set; }

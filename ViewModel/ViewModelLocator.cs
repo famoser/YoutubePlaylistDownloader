@@ -15,6 +15,8 @@
 using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Ioc;
 using Microsoft.Practices.ServiceLocation;
+using YoutubePlaylistDownloader.Business.Services.Interfaces;
+using YoutubePlaylistDownloader.Implementations;
 using YoutubePlaylistDownloader.View.ViewModels;
 
 namespace YoutubePlaylistDownloader.ViewModel
@@ -32,26 +34,26 @@ namespace YoutubePlaylistDownloader.ViewModel
         {
             ServiceLocator.SetLocatorProvider(() => SimpleIoc.Default);
 
-            ////if (ViewModelBase.IsInDesignModeStatic)
-            ////{
-            ////    // Create design time view services and models
-            ////    SimpleIoc.Default.Register<IDataService, DesignDataService>();
-            ////}
-            ////else
-            ////{
-            ////    // Create run time view services and models
-            ////    SimpleIoc.Default.Register<IDataService, DataService>();
-            ////}
+            SimpleIoc.Default.Register<ProgressViewModel>();
+            SimpleIoc.Default.Register<IProgressService, ProgressService>();
 
             SimpleIoc.Default.Register<MainPageViewModel>();
+
+            if (ViewModelBase.IsInDesignModeStatic)
+            {
+                // Create design time view services and models
+                SimpleIoc.Default.GetInstance<ProgressViewModel>();
+            }
         }
 
         public MainPageViewModel MainPageViewModel
         {
-            get
-            {
-                return ServiceLocator.Current.GetInstance<MainPageViewModel>();
-            }
+            get { return ServiceLocator.Current.GetInstance<MainPageViewModel>(); }
+        }
+
+        public ProgressViewModel ProgressViewModel
+        {
+            get { return ServiceLocator.Current.GetInstance<ProgressViewModel>(); }
         }
 
         public static void Cleanup()

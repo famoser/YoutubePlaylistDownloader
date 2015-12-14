@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Florianalexandermoser.Common.Patterns.Singleton;
 
 namespace Florianalexandermoser.Common.Utils.Logs
@@ -50,6 +47,17 @@ namespace Florianalexandermoser.Common.Utils.Logs
             var templogs = new List<LogModel>(_logs);
             _logs = new List<LogModel>();
             return templogs;
+        }
+
+        public void LogExeption(Exception ex)
+        {
+            var lm = new LogModel
+            {
+                LogLevel = LogLevel.FatalError,
+                Message = ex.ToString()
+            };
+            
+            _logs.Add(lm);
         }
     }
 }
