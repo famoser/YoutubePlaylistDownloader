@@ -34,7 +34,7 @@ namespace YoutubePlaylistDownloader.Business.Services
                 _progressService.SetProgress(pm, 0);
                 var vids = await YoutubeService.Instance.GetVideos(playlist.Id);
                 var tempdic = Path.Combine(tempFolder, playlist.Name);
-                var targetdic = Path.Combine(tempFolder, playlist.Name);
+                var targetdic = Path.Combine(targetFolder, playlist.Name);
 
                 SortOutAlreadyKnownVideos(targetdic, ref vids);
                 _progressService.SetProgress(pm, 50);
@@ -108,15 +108,17 @@ namespace YoutubePlaylistDownloader.Business.Services
 
         private async Task DownloadTempFiles(string dic, List<VideoModel> downloadVids)
         {
-            foreach (var videoModel in downloadVids.Where(v => !v.IsDownloaded))
+            var toProcess = downloadVids.Where(v => !v.IsDownloaded).ToList();
+            for (int index = 0; index < toProcess.Count; index++)
             {
+                var videoModel = toProcess[index];
                 var pm = new ProgressModel()
                 {
-                    Description = "Downloading " + videoModel.Name
+                    Description = "Downloading " + videoModel.Name + " (" + index + 1 + " / " + toProcess.Count + ")"
                 };
                 _progressService.SetProgress(pm, 0);
 
-                await DownloadService.Instance.DownloadYoutubeVideo(videoModel, dic, pm);
+                videoModel.IsDownloaded = await DownloadService.Instance.DownloadYoutubeVideo(videoModel, dic, pm);
 
                 _progressService.RemoveProgress(pm);
             }
@@ -146,6 +148,10 @@ namespace YoutubePlaylistDownloader.Business.Services
                             model.AlbumArtist = split[0].Trim();
                             model.Album = split[0].Trim();
                         }
+                    }
+                    else
+                    {
+                        model.OriginalTitle = videoId;
                     }
 
                     model.Comment = videoId;

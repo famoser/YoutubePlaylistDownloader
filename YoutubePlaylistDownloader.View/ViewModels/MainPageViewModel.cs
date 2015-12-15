@@ -19,7 +19,9 @@ namespace YoutubePlaylistDownloader.View.ViewModels
             _getPlaylistsCommand = new RelayCommand(GetPlaylists, () => CanExecuteGetPlaylistsCommand);
             _saveStateCommand = new RelayCommand(SaveState);
 
+            _downloadAlbumArtCommand = new RelayCommand(DownloadAlbumArt, () => CanExecuteDownloadAlbumArtCommand);
             _saveMp3Command = new RelayCommand(SaveMp3, () => CanExecuteSaveMp3Command);
+            _addToPlaylistsCommand = new RelayCommand(AddToPlaylist, () => CanExecuteAddToPlaylistCommand);
 
             if (IsInDesignMode)
             {
@@ -46,7 +48,9 @@ namespace YoutubePlaylistDownloader.View.ViewModels
                         Artist = "Artist",
                         Comment = "Comment",
                         Genre = "Genre",
-                        Title = "Title"
+                        Title = "Title",
+                        AlbumCover = new Uri("http://ecx.images-amazon.com/images/I/71HH7D7Z66L._SL1500_.jpg"),
+                        Year = 2012
                     };
                     Mp3Files.Add(model);
                 }
@@ -128,6 +132,8 @@ namespace YoutubePlaylistDownloader.View.ViewModels
                 var newfiles = await WorkflowService.Instance.Execute(playlist, TempFolder, TargetFolder);
                 foreach (var mp3Model in newfiles)
                 {
+                    mp3Model.AlbumCover = await Mp3Service.Instance.GetAlbumCoverUri(mp3Model);
+                    await Mp3Service.Instance.SaveModel(mp3Model, false);
                     Mp3Files.Add(mp3Model);
                 }
             }
@@ -152,7 +158,7 @@ namespace YoutubePlaylistDownloader.View.ViewModels
             _saveMp3Active = true;
             _saveMp3Command.RaiseCanExecuteChanged();
 
-            await Task.Run(() => Mp3Service.Instance.SaveModel(SelectedMp3File));
+            await Task.Run(() => Mp3Service.Instance.SaveModel(SelectedMp3File, true));
             Mp3Files.Remove(SelectedMp3File);
             if (Mp3Files.Any())
                 SelectedMp3File = Mp3Files[0];
@@ -160,7 +166,64 @@ namespace YoutubePlaylistDownloader.View.ViewModels
             _saveMp3Active = false;
             _saveMp3Command.RaiseCanExecuteChanged();
         }
+
+        private RelayCommand _downloadAlbumArtCommand;
+        public ICommand DownloadAlbumArtCommand
+        {
+            get { return _downloadAlbumArtCommand; }
+        }
+
+        public bool CanExecuteDownloadAlbumArtCommand
+        {
+            get { return !_downloadAlbumArtActive; }
+        }
+
+        private bool _downloadAlbumArtActive;
+        public async void DownloadAlbumArt()
+        {
+            _downloadAlbumArtActive = true;
+            _downloadAlbumArtCommand.RaiseCanExecuteChanged();
+
+            SelectedMp3File.AlbumCover = await Mp3Service.Instance.GetAlbumCoverUri(SelectedMp3File);
+
+            _downloadAlbumArtActive = false;
+            _downloadAlbumArtCommand.RaiseCanExecuteChanged();
+        }
+
+
+        private string _playListLink;
+        public string PlaylistLink
+        {
+            get { return _playListLink; }
+            set
+            {
+                if (Set(ref _playListLink, value))
+                    _addToPlaylistsCommand.RaiseCanExecuteChanged();
+            }
+        }
+
+        private RelayCommand _addToPlaylistsCommand;
+        public ICommand AddToPlaylistCommand
+        {
+            get { return _addToPlaylistsCommand; }
+        }
+
+        public bool CanExecuteAddToPlaylistCommand
+        {
+            get { return !string.IsNullOrEmpty(PlaylistLink); }
+        }
         
+        public async void AddToPlaylist()
+        {
+            var playlist = await YoutubeService.Instance.GetPlaylistByLink(PlaylistLink);
+            if (playlist != null)
+            {
+                Playlists.Add(playlist);
+                _startDownload.RaiseCanExecuteChanged();
+            }
+            _playListLink = null;
+        }
+
         private ObservableCollection<PlaylistModel> _playlists;
         public ObservableCollection<PlaylistModel> Playlists
         {

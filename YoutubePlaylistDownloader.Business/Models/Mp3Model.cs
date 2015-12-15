@@ -65,11 +65,22 @@ namespace YoutubePlaylistDownloader.Business.Models
             set { Set(ref _comment, value); }
         }
 
+        private Uri _albumCover;
+        public Uri AlbumCover
+        {
+            get { return _albumCover; }
+            set { Set(ref _albumCover, value); }
+        }
+
         public string FilePath { get; set; }
         public string TargetFolder { get; set; }
         public string TargetFilePath
         {
-            get { return Path.Combine(TargetFolder, Artist + " - " + Title + ".mp3"); }
+            get
+            {
+                var filename = Path.GetInvalidFileNameChars().Aggregate(Artist + " - " + Title + ".mp3", (current, c) => current.Replace(c.ToString(), string.Empty));
+                return Path.Combine(TargetFolder, filename);
+            }
         }
     }
 }

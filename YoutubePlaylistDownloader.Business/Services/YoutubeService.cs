@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Florianalexandermoser.Common.Patterns.Singleton;
@@ -70,6 +71,44 @@ namespace YoutubePlaylistDownloader.Business.Services
                 LogHelper.Instance.LogExeption(ex);
             }
             return new List<PlaylistModel>();
+        }
+
+        public async Task<PlaylistModel> GetPlaylistByLink(string link)
+        {
+            try
+            {
+                var youtubeService = await GetService();
+
+                if (youtubeService != null)
+                {
+                    var id = link.Substring(link.LastIndexOf("list=", StringComparison.Ordinal) + "list=".Length);
+                    
+                    var playlistrequestTask = youtubeService.Playlists.List("snippet, contentDetails");
+                    playlistrequestTask.Id = id;
+
+                    var response = await playlistrequestTask.ExecuteAsync();
+                    if (response.Items.Any())
+                    {
+                        //if (rawPlaylist.ContentDetails)
+                        var model = new PlaylistModel()
+                        {
+                            Id = response.Items[0].Id,
+                            Name = response.Items[0].Snippet.Title,
+
+                        };
+                        model.TotalVideos = response.Items[0].ContentDetails.ItemCount.HasValue
+                            ? (int)response.Items[0].ContentDetails.ItemCount.Value
+                            : 0;
+
+                        return model;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.Instance.LogExeption(ex);
+            }
+            return null;
         }
 
 

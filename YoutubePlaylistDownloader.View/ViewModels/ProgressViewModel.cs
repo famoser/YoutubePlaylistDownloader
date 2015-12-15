@@ -30,6 +30,7 @@ namespace YoutubePlaylistDownloader.View.ViewModels
 
             _percentageProgressModels[pm] = progress;
             ActiveModel = pm;
+            RaisePropertyChanged(() => ActiveProgress);
         }
 
         private ProgressModel _activeModel;
@@ -53,6 +54,7 @@ namespace YoutubePlaylistDownloader.View.ViewModels
                     return _percentageProgressModels[ActiveModel];
                 return 0;
             }
+            set { }
         }
 
         public string ProgressMessage

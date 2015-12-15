@@ -8,6 +8,9 @@
         Title="MainWindow"
         DataContext="{Binding MainPageViewModel, Source={StaticResource Locator}}">
 
+
+
+
     <Grid Margin="10,0,10,10">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -41,13 +44,18 @@
             </Grid>
         </StackPanel>
         <Grid Grid.Column="0" Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
                 <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
-            <TextBlock Grid.Row="0" Text="Playlists" Style="{StaticResource TitelStyle}" />
-            <ListView Grid.Row="1" ItemsSource="{Binding Playlists}" SelectionMode="Multiple" ItemTemplate="{StaticResource PlaylistDataTemplate}" >
+            <TextBlock Grid.Row="0" Grid.ColumnSpan="2" Text="Playlists" Style="{StaticResource TitelStyle}" />
+            <ListView Grid.ColumnSpan="2" Grid.Column="0" Grid.Row="1" ItemsSource="{Binding Playlists}" SelectionMode="Multiple" ItemTemplate="{StaticResource PlaylistDataTemplate}" >
                 <ListBox.ItemContainerStyle>
                     <Style TargetType="{x:Type ListBoxItem}">
                         <Setter Property="IsSelected" Value="{Binding Mode=TwoWay, Path=Download}" />
@@ -55,22 +63,20 @@
                     </Style>
                 </ListBox.ItemContainerStyle>
             </ListView>
+            <TextBox Grid.Row="2" Grid.Column="0" Text="{Binding PlaylistLink, Mode=TwoWay}" />
+            <Button Grid.Row="2" Grid.Column="1" Command="{Binding AddToPlaylistCommand}" Content="Add To Playlist" />
 
-            <Button Grid.Row="2" Command="{Binding StartDownloadCommand}" Content="Start Download" />
+            <Button Grid.Row="3" Grid.Column="1" Command="{Binding StartDownloadCommand}" Content="Start Download" />
         </Grid>
         <Grid Grid.Column="0"  Grid.Row="2">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="154*"/>
-                <ColumnDefinition Width="31*"/>
-            </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
-            <TextBlock Grid.Row="0" Text="Progress" Style="{StaticResource TitelStyle}" Grid.ColumnSpan="2" />
+            <TextBlock Grid.Row="0" Text="Progress" Style="{StaticResource TitelStyle}" />
             <TextBlock Grid.Row="1" Text="{Binding ProgressViewModel.ProgressMessage, Source={StaticResource Locator}}" FontSize="20" Grid.ColumnSpan="2" />
-            <ProgressBar Grid.Row="2" Maximum="100" Minimum="0" Value="{Binding ProgressViewModel.ActiveProgress, Source={StaticResource Locator}, Mode=OneTime}" IsIndeterminate="False" Height="30" Grid.ColumnSpan="2" />
+            <ProgressBar Grid.Row="2" Maximum="100" Minimum="0" Value="{Binding ProgressViewModel.ActiveProgress, Source={StaticResource Locator}}" IsIndeterminate="False" Height="30" Grid.ColumnSpan="2" />
         </Grid>
         <Border Grid.Column="1" Grid.Row="0" Grid.RowSpan="3" BorderBrush="Gray" BorderThickness="0,0,1,0" Margin="5,0" />
         <Grid Grid.Column="2" Grid.Row="0">
@@ -87,34 +93,51 @@
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
-                <RowDefinition Height="5" />
                 <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="5" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="5" />
-                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
             </Grid.RowDefinitions>
-            <TextBlock Grid.Row="0" Grid.Column="0" Text="Titel" />
-            <TextBox Grid.Row="1" Grid.Column="0" Text="{Binding SelectedMp3File.Title}" />
-            
-            <TextBlock Grid.Row="0" Grid.Column="1" Text="Artist" />
-            <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding SelectedMp3File.Artist}" />
 
-            <TextBlock Grid.Row="3" Grid.Column="0" Text="Album Artist" />
-            <TextBox Grid.Row="4" Grid.Column="0" Text="{Binding SelectedMp3File.AlbumArtist}" />
+            <StackPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2">
+                <TextBlock Text="Original Title" />
+                <TextBox Text="{Binding SelectedMp3File.OriginalTitle}" IsReadOnly="True" />
+            </StackPanel>
 
-            <TextBlock Grid.Row="3" Grid.Column="1" Text="Album" />
-            <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding SelectedMp3File.Album}" />
+            <StackPanel Grid.Row="1" Grid.Column="0">
+                <TextBlock Text="Titel" />
+                <TextBox Text="{Binding SelectedMp3File.Title}" />
 
-            <TextBlock Grid.Row="6" Grid.Column="0" Text="Genre" />
-            <TextBox Grid.Row="7" Grid.Column="0" Text="{Binding SelectedMp3File.Genre}" />
+                <TextBlock Text="Album Artist" />
+                <TextBox Text="{Binding SelectedMp3File.AlbumArtist}" />
 
-            <TextBlock Grid.Row="6" Grid.Column="1" Text="Year" />
-            <TextBox Grid.Row="7" Grid.Column="1" Text="{Binding SelectedMp3File.Year}" />
+                <TextBlock Text="Genre"/>
+                <TextBox Text="{Binding SelectedMp3File.Genre}" />
 
-            <Button Command="{Binding SaveMp3Command}" Grid.Row="9"  Grid.Column="1" Content="Save" />
+            </StackPanel>
+            <StackPanel Grid.Row="1" Grid.Column="1">
+                <TextBlock Text="Artist" />
+                <TextBox Text="{Binding SelectedMp3File.Artist}" />
+                <TextBlock Text="Album" />
+                <TextBox Text="{Binding SelectedMp3File.Album}" />
+                <TextBlock Text="Year" />
+                <TextBox Text="{Binding SelectedMp3File.Year}" />
+            </StackPanel>
+
+            <StackPanel Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2">
+
+                <TextBlock Text="Album Art" />
+                <TextBox Text="{Binding SelectedMp3File.AlbumCover}" />
+            </StackPanel>
+
+            <Grid Grid.Row="3" Grid.Column="0">
+                <Image Margin="0,5,0,0" Source="{Binding SelectedMp3File.AlbumCover, Converter={StaticResource UriToImageSourceConverter}}">
+                    </Image>
+            </Grid>
+            <StackPanel Grid.Row="3" Grid.Column="1" Margin="0,5">
+
+                <Button Command="{Binding DownloadAlbumArtCommand}" Content="Download Album Art" Margin="0,0,0,5" />
+                <Button Command="{Binding SaveMp3Command}" Content="Save" Margin="0,0,0,5" />
+            </StackPanel>
+
         </Grid>
     </Grid>
 </Window>
