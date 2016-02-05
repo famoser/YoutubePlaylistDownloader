@@ -6,8 +6,8 @@ using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
-using Florianalexandermoser.Common.Patterns.Singleton;
-using Florianalexandermoser.Common.Utils.Logs;
+using Famoser.FrameworkEssentials.Logging;
+using Famoser.FrameworkEssentials.Singleton;
 using GalaSoft.MvvmLight.Ioc;
 using TagLib;
 using YoutubeExtractor;
@@ -33,7 +33,7 @@ namespace YoutubePlaylistDownloader.Business.Services
                     .OrderByDescending(info => info.AudioBitrate)
                     .FirstOrDefault();
 
-                if (videoInfos == null)
+                if (video == null)
                     return false;
 
                 /*
@@ -70,7 +70,7 @@ namespace YoutubePlaylistDownloader.Business.Services
             }
             catch (Exception ex)
             {
-                LogHelper.Instance.LogExeption(ex);
+                LogHelper.Instance.LogException(ex);
             }
             return false;
         }
@@ -90,7 +90,7 @@ namespace YoutubePlaylistDownloader.Business.Services
             }
             catch (Exception e)
             {
-                LogHelper.Instance.LogExeption(e);
+                LogHelper.Instance.LogException(e);
             }
             return null;
         }

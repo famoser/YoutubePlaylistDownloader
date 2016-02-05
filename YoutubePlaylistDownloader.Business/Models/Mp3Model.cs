@@ -82,5 +82,11 @@ namespace YoutubePlaylistDownloader.Business.Models
                 return Path.Combine(TargetFolder, filename);
             }
         }
+
+        public bool AllImportantPropertiesFilled => !string.IsNullOrEmpty(Title) &&
+                                                    !string.IsNullOrEmpty(Artist) &&
+                                                    !string.IsNullOrEmpty(Album) &&
+                                                    !string.IsNullOrEmpty(AlbumArtist) &&
+                                                    !string.IsNullOrEmpty(Genre);
     }
 }

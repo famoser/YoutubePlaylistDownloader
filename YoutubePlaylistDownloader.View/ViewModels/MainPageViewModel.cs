@@ -18,6 +18,7 @@ namespace YoutubePlaylistDownloader.View.ViewModels
             _startDownload = new RelayCommand(StartDownload, () => CanExecuteStartDownloadCommand);
             _getPlaylistsCommand = new RelayCommand(GetPlaylists, () => CanExecuteGetPlaylistsCommand);
             _saveStateCommand = new RelayCommand(SaveState);
+            _startWizardCommand = new RelayCommand(StartWizard, () => CanExecuteStartWizardCommand);
 
             _downloadAlbumArtCommand = new RelayCommand(DownloadAlbumArt, () => CanExecuteDownloadAlbumArtCommand);
             _saveMp3Command = new RelayCommand(SaveMp3, () => CanExecuteSaveMp3Command);
@@ -58,13 +59,15 @@ namespace YoutubePlaylistDownloader.View.ViewModels
             }
             else
             {
-                var state = SaveService.Instance.RetrieveState();
+                _state = SaveService.Instance.RetrieveState();
                 Mp3Files = new ObservableCollection<Mp3Model>();
                 Playlists = new ObservableCollection<PlaylistModel>();
-                TargetFolder = state.TargetFolder;
-                TempFolder = state.TempFolder;
+                TargetFolder = _state.TargetFolder;
+                TempFolder = _state.TempFolder;
             }
         }
+
+        private SaveModel _state;
 
         private bool _getPlaylistsActive;
         private RelayCommand _getPlaylistsCommand;
@@ -87,6 +90,13 @@ namespace YoutubePlaylistDownloader.View.ViewModels
             _getPlaylistsCommand.RaiseCanExecuteChanged();
 
             Playlists = new ObservableCollection<PlaylistModel>(await YoutubeService.Instance.GetPlaylists());
+
+            if (_state != null && _state.SelectedPlaylists != null)
+                foreach (var playlistModel in Playlists)
+                {
+                    playlistModel.Download = _state.SelectedPlaylists.Any(p => p == playlistModel.Id);
+                }
+
             _startDownload.RaiseCanExecuteChanged();
 
             _getPlaylistsActive = false;
@@ -101,12 +111,13 @@ namespace YoutubePlaylistDownloader.View.ViewModels
 
         public void SaveState()
         {
-            var state = new SaveModel()
+            _state = new SaveModel()
             {
                 TempFolder = TempFolder,
-                TargetFolder = TargetFolder
+                TargetFolder = TargetFolder,
+                SelectedPlaylists = Playlists.Where(p => p.Download).Select(p => p.Id).ToList()
             };
-            SaveService.Instance.SaveState(state);
+            SaveService.Instance.SaveState(_state);
         }
 
 
@@ -167,6 +178,38 @@ namespace YoutubePlaylistDownloader.View.ViewModels
             _saveMp3Command.RaiseCanExecuteChanged();
         }
 
+        private RelayCommand _startWizardCommand;
+        public ICommand StartWizardCommand
+        {
+            get { return _startWizardCommand; }
+        }
+
+        public bool CanExecuteStartWizardCommand
+        {
+            get { return !_wizardActive; }
+        }
+
+        private bool _wizardActive;
+        public async void StartWizard()
+        {
+            _wizardActive = true;
+            _startWizardCommand.RaiseCanExecuteChanged();
+            _saveMp3Command.RaiseCanExecuteChanged();
+
+            var res = await Mp3Service.Instance.GetSaveReadyModels(Mp3Files);
+            await Mp3Service.Instance.SaveAllModels(res, true);
+            foreach (var mp3Model in res)
+            {
+                Mp3Files.Remove(mp3Model);
+            }
+
+            _wizardActive = false;
+            _saveMp3Command.RaiseCanExecuteChanged();
+            _saveMp3Command.RaiseCanExecuteChanged();
+        }
+
+
+
         private RelayCommand _downloadAlbumArtCommand;
         public ICommand DownloadAlbumArtCommand
         {
@@ -212,7 +255,7 @@ namespace YoutubePlaylistDownloader.View.ViewModels
         {
             get { return !string.IsNullOrEmpty(PlaylistLink); }
         }
-        
+
         public async void AddToPlaylist()
         {
             var playlist = await YoutubeService.Instance.GetPlaylistByLink(PlaylistLink);

@@ -41,6 +41,10 @@
       <HintPath>packages\BouncyCastle.1.7.0\lib\Net40-Client\BouncyCastle.Crypto.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="Famoser.FrameworkEssentials, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>packages\Famoser.FrameworkEssentials.1.2.1\lib\portable-net4+wp8+win8\Famoser.FrameworkEssentials.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="GalaSoft.MvvmLight, Version=5.2.0.37222, Culture=neutral, PublicKeyToken=e7570ab207bcb616, processorArchitecture=MSIL">
       <HintPath>packages\MvvmLightLibs.5.2.0.0\lib\net45\GalaSoft.MvvmLight.dll</HintPath>
       <Private>True</Private>
@@ -192,10 +196,6 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="Florianalexandermoser.Common\Florianalexandermoser.Common.csproj">
-      <Project>{f02c8bff-8d32-47c9-8db3-0f0bb1dba2f2}</Project>
-      <Name>Florianalexandermoser.Common</Name>
-    </ProjectReference>
     <ProjectReference Include="YoutubePlaylistDownloader.Business\YoutubePlaylistDownloader.Business.csproj">
       <Project>{c52e6bc5-19a0-4a5b-a71d-7f3cbef4eb95}</Project>
       <Name>YoutubePlaylistDownloader.Business</Name>

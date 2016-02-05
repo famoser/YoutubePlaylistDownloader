@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
-using Florianalexandermoser.Common.Patterns.Singleton;
-using Florianalexandermoser.Common.Utils.Logs;
+using Famoser.FrameworkEssentials.Logging;
+using Famoser.FrameworkEssentials.Singleton;
 using GalaSoft.MvvmLight.Ioc;
 using Newtonsoft.Json;
 using YoutubePlaylistDownloader.Business.Models;
@@ -20,7 +20,7 @@ namespace YoutubePlaylistDownloader.Business.Services
             }
             catch (Exception ex)
             {
-                LogHelper.Instance.LogExeption(ex);
+                LogHelper.Instance.LogException(ex);
             }
         }
 
@@ -36,7 +36,7 @@ namespace YoutubePlaylistDownloader.Business.Services
             }
             catch (Exception ex)
             {
-                LogHelper.Instance.LogExeption(ex);
+                LogHelper.Instance.LogException(ex);
             }
             return new SaveModel();
         }

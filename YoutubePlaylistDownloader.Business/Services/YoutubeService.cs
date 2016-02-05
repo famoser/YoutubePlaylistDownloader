@@ -4,8 +4,8 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Florianalexandermoser.Common.Patterns.Singleton;
-using Florianalexandermoser.Common.Utils.Logs;
+using Famoser.FrameworkEssentials.Logging;
+using Famoser.FrameworkEssentials.Singleton;
 using Google.Apis.Auth.OAuth2;
 using Google.Apis.Services;
 using Google.Apis.Util.Store;
@@ -68,7 +68,7 @@ namespace YoutubePlaylistDownloader.Business.Services
             }
             catch (Exception ex)
             {
-                LogHelper.Instance.LogExeption(ex);
+                LogHelper.Instance.LogException(ex);
             }
             return new List<PlaylistModel>();
         }
@@ -106,7 +106,7 @@ namespace YoutubePlaylistDownloader.Business.Services
             }
             catch (Exception ex)
             {
-                LogHelper.Instance.LogExeption(ex);
+                LogHelper.Instance.LogException(ex);
             }
             return null;
         }
@@ -147,7 +147,7 @@ namespace YoutubePlaylistDownloader.Business.Services
             }
             catch (Exception ex)
             {
-                LogHelper.Instance.LogExeption(ex);
+                LogHelper.Instance.LogException(ex);
             }
             return new List<VideoModel>();
         }
@@ -179,7 +179,7 @@ namespace YoutubePlaylistDownloader.Business.Services
             }
             catch (Exception ex)
             {
-                LogHelper.Instance.LogExeption(ex);
+                LogHelper.Instance.LogException(ex);
             }
             return null;
         }

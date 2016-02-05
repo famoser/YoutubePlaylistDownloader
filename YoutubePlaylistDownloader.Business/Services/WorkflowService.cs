@@ -4,8 +4,8 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Florianalexandermoser.Common.Patterns.Singleton;
-using Florianalexandermoser.Common.Utils.Logs;
+using Famoser.FrameworkEssentials.Logging;
+using Famoser.FrameworkEssentials.Singleton;
 using GalaSoft.MvvmLight.Ioc;
 using TagLib;
 using YoutubePlaylistDownloader.Business.Models;
@@ -45,12 +45,11 @@ namespace YoutubePlaylistDownloader.Business.Services
                 await DownloadTempFiles(tempdic, vids);
 
                 _progressService.RemoveProgress(pm);
-                return RetrieveMp3Models(tempdic, targetdic, vids);
-
+                return RetrieveMp3Models(tempdic, targetdic, vids, playlist);
             }
             catch (Exception ex)
             {
-                LogHelper.Instance.LogExeption(ex);
+                LogHelper.Instance.LogException(ex);
             }
             return new List<Mp3Model>();
         }
@@ -97,7 +96,7 @@ namespace YoutubePlaylistDownloader.Business.Services
                     {
                         var videoId = file.Split(new[] { "." }, StringSplitOptions.None)[0];
                         videoId = videoId.Substring(videoId.LastIndexOf("\\", StringComparison.Ordinal) + 1);
-                        
+
                         var item = downloadVids.FirstOrDefault(v => v.Id == videoId);
                         if (item != null)
                             item.IsDownloaded = true;
@@ -114,7 +113,7 @@ namespace YoutubePlaylistDownloader.Business.Services
                 var videoModel = toProcess[index];
                 var pm = new ProgressModel()
                 {
-                    Description = "Downloading " + videoModel.Name + " (" + index + 1 + " / " + toProcess.Count + ")"
+                    Description = "Downloading " + videoModel.Name + " (" + (index + 1) + " / " + toProcess.Count + ")"
                 };
                 _progressService.SetProgress(pm, 0);
 
@@ -124,7 +123,7 @@ namespace YoutubePlaylistDownloader.Business.Services
             }
         }
 
-        private List<Mp3Model> RetrieveMp3Models(string dic, string targetdic, List<VideoModel> downloadVids)
+        private List<Mp3Model> RetrieveMp3Models(string dic, string targetdic, List<VideoModel> downloadVids, PlaylistModel playlist)
         {
             var res = new List<Mp3Model>();
             string[] files = Directory.GetFiles(dic, "*.mp3", SearchOption.TopDirectoryOnly);
@@ -145,8 +144,13 @@ namespace YoutubePlaylistDownloader.Business.Services
                             var split = model.OriginalTitle.Split(new[] { "-" }, StringSplitOptions.RemoveEmptyEntries);
                             model.Title = split[1].Trim();
                             model.Artist = split[0].Trim();
-                            model.AlbumArtist = split[0].Trim();
-                            model.Album = split[0].Trim();
+                            model.AlbumArtist = "famoser";
+                            model.Album = "yout: " + playlist.Name;
+                            model.Genre = playlist.Name;
+                        }
+                        else
+                        {
+                            model.Title = item.Name;
                         }
                     }
                     else
