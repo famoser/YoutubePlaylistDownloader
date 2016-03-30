@@ -63,7 +63,7 @@ namespace YoutubePlaylistDownloader.Business.Services
                             : 0;
                         res.Add(model);
                     }
-                    return res;
+                    return res.OrderBy(p => p.Name).ToList();
                 }
             }
             catch (Exception ex)
