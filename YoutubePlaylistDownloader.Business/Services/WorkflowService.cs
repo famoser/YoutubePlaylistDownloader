@@ -36,7 +36,7 @@ namespace YoutubePlaylistDownloader.Business.Services
                 var tempdic = Path.Combine(tempFolder, playlist.Name);
                 var targetdic = Path.Combine(targetFolder, playlist.Name);
 
-                SortOutAlreadyKnownVideos(targetdic, ref vids);
+                SortOutAlreadyKnownVideos(targetdic, playlist.Name, ref vids);
                 _progressService.SetProgress(pm, 50);
 
                 PrepareTempFolder(tempdic, ref vids);
@@ -54,7 +54,7 @@ namespace YoutubePlaylistDownloader.Business.Services
             return new List<Mp3Model>();
         }
 
-        private void SortOutAlreadyKnownVideos(string dic, ref List<VideoModel> vids)
+        private void SortOutAlreadyKnownVideos(string dic, string playlistName, ref List<VideoModel> vids)
         {
             /* remove already processed files */
             if (!Directory.Exists(dic))
@@ -62,24 +62,36 @@ namespace YoutubePlaylistDownloader.Business.Services
             else
             {
                 string[] files = Directory.GetFiles(dic, "*.mp3", SearchOption.TopDirectoryOnly);
-                if (files.Length > 0)
+                foreach (var file in files)
                 {
-                    foreach (var file in files)
+                    using (var fileStream = new FileStream(Path.Combine(dic, file), FileMode.Open))
                     {
-                        using (var fileStream = new FileStream(Path.Combine(dic, file), FileMode.Open))
-                        {
-                            var tagFile = File.Create(new StreamFileAbstraction(fileStream.Name,
-                                             fileStream, fileStream));
+                        var tagFile = File.Create(new StreamFileAbstraction(fileStream.Name,
+                                         fileStream, fileStream));
 
-                            var tags = tagFile.GetTag(TagTypes.Id3v2);
-                            var comm = tags.Comment;
-                            var item = vids.FirstOrDefault(v => v.Id == comm);
-                            if (item != null)
-                                vids.Remove(item);
+                        var tags = tagFile.GetTag(TagTypes.Id3v2);
+                        var comm = tags.Comment;
+                        var item = vids.FirstOrDefault(v => v.Id == comm);
+                        if (item != null)
+                        {
+                            ForceTagsInTargetFolder(tagFile, playlistName);
+                            vids.Remove(item);
+
                         }
                     }
                 }
             }
+        }
+
+        private void ForceTagsInTargetFolder(TagLib.File file, string playlistName)
+        {
+            file.Tag.Album = "yout";
+
+            file.Tag.AlbumArtists = new[] { "famoser" };
+            file.Tag.Album = "yout: " + playlistName;
+            file.Tag.Genres = new[] { playlistName };
+
+            //TODO
         }
 
         private void PrepareTempFolder(string dic, ref List<VideoModel> downloadVids)
@@ -144,9 +156,6 @@ namespace YoutubePlaylistDownloader.Business.Services
                             var split = model.OriginalTitle.Split(new[] { "-" }, StringSplitOptions.RemoveEmptyEntries);
                             model.Title = split[1].Trim();
                             model.Artist = split[0].Trim();
-                            model.AlbumArtist = "famoser";
-                            model.Album = "yout: " + playlist.Name;
-                            model.Genre = playlist.Name;
                         }
                         else
                         {
@@ -161,6 +170,9 @@ namespace YoutubePlaylistDownloader.Business.Services
                     model.Comment = videoId;
                     model.Year = (uint)DateTime.Now.Year;
                     model.TargetFolder = targetdic;
+                    model.AlbumArtist = "famoser";
+                    model.Album = "yout: " + playlist.Name;
+                    model.Genre = playlist.Name;
 
                     res.Add(model);
                 }
