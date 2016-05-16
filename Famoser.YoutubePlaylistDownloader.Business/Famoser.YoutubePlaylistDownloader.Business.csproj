@@ -60,8 +60,6 @@
     <Compile Include="Helpers\DownloadHelper.cs" />
     <Compile Include="Services\Interfaces\IFolderStorageService.cs" />
     <Compile Include="Services\Interfaces\IPlatformService.cs" />
-    <Compile Include="Services\Mp3Service.cs" />
-    <Compile Include="Services\WorkflowService.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Famoser.FrameworkEssentials, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">

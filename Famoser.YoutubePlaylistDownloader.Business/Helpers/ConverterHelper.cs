@@ -28,14 +28,30 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Helpers
             };
         }
         
-        public static List<VideoModel> Convert(List<VideoCacheModel> models)
+        public static List<VideoModel> Convert(IList<VideoCacheModel> models)
         {
             return models.Select(Convert).ToList();
         }
 
-        public static List<VideoCacheModel> Convert(List<VideoModel> models)
+        public static List<VideoCacheModel> Convert(IList<VideoModel> models)
         {
             return models.Select(Convert).ToList();
         }
+
+        public static PlaylistCacheModel Convert(PlaylistModel model)
+        {
+            return new PlaylistCacheModel()
+            {
+                Id = model.Id,
+                Download = model.Download,
+                DownloadedVideos = Convert(model.DownloadedVideos),
+                FailedVideos = Convert(model.FailedVideos)
+            };
+        }
+
+        public static List<PlaylistCacheModel> Convert(IList<PlaylistModel> models)
+        {
+            return models.Select(Convert).ToList();
+        } 
     }
 }

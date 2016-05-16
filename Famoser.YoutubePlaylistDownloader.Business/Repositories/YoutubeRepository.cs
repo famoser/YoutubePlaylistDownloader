@@ -174,9 +174,7 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Repositories
             }
             return new List<VideoModel>();
         }
-
-
-
+        
         public async Task<PlaylistModel> GetPlaylistByLink(string link)
         {
             try
@@ -193,7 +191,6 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Repositories
                     var response = await playlistrequestTask.ExecuteAsync();
                     if (response.Items.Any())
                     {
-                        //if (rawPlaylist.ContentDetails)
                         var model = new PlaylistModel()
                         {
                             Id = response.Items[0].Id,
