@@ -43,6 +43,14 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Repositories
             }
         }
 
+        public void AssignMetaTags(IList<PlaylistModel> list)
+        {
+            foreach (var playlistModel in list)
+            {
+                AssignMetaTags(playlistModel);
+            }
+        }
+
         public async Task<Uri> GetAlbumCoverUri(Mp3Model model)
         {
             try

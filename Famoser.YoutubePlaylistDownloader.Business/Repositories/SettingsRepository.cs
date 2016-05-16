@@ -58,5 +58,11 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Repositories
             await Initialize();
             return _cache;
         }
+
+        public Task<bool> SaveCache(CacheModel cache)
+        {
+            return _storageService.SetCachedTextFileAsync(FileKeys.CacheFile.ToString(),
+                JsonConvert.SerializeObject(cache));
+        }
     }
 }

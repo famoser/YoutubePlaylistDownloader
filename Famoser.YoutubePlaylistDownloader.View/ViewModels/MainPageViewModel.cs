@@ -15,10 +15,10 @@ namespace Famoser.YoutubePlaylistDownloader.View.ViewModels
 {
     public class MainPageViewModel : ViewModelBase
     {
-        private IMp3Respository _mp3Respository;
-        private IYoutubeRepository _youtubeRepository;
-        private ISmartRepository _smartRepository;
-        private IProgressService _progressService;
+        private readonly IMp3Respository _mp3Respository;
+        private readonly IYoutubeRepository _youtubeRepository;
+        private readonly ISmartRepository _smartRepository;
+        private readonly IProgressService _progressService;
 
         public MainPageViewModel(IMp3Respository mp3Respository, IYoutubeRepository youtubeRepository, ISmartRepository smartRepository, IProgressService progressService)
         {
@@ -55,7 +55,7 @@ namespace Famoser.YoutubePlaylistDownloader.View.ViewModels
             Playlists = await _youtubeRepository.GetPlaylists();
         }
 
-        private RelayCommand _startDownload;
+        private readonly RelayCommand _startDownload;
         public ICommand StartDownloadCommand
         {
             get { return _startDownload; }
@@ -92,7 +92,7 @@ namespace Famoser.YoutubePlaylistDownloader.View.ViewModels
             }
         }
 
-        private RelayCommand _addToPlaylistsCommand;
+        private readonly RelayCommand _addToPlaylistsCommand;
         public ICommand AddToPlaylistCommand
         {
             get { return _addToPlaylistsCommand; }
