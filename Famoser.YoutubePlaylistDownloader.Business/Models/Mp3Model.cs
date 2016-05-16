@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using Famoser.YoutubeExtractor.Portable.Models;
 using TagLib;
 
 namespace Famoser.YoutubePlaylistDownloader.Business.Models
@@ -71,6 +72,8 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Models
         }
 
         public File File { get; set; }
+        public Stream DownloadStream { get; set; }
+        public VideoModel VideoInfo { get; set; }
 
         public bool AllImportantPropertiesFilled => !string.IsNullOrEmpty(Title) &&
                                                     !string.IsNullOrEmpty(Artist) &&

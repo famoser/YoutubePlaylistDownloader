@@ -10,7 +10,7 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Repositories.Interfaces
 {
     public interface IMp3Respository
     {
-        Task<List<Mp3Model>> GetModelsForPlaylist(string playlistId, IProgressService service);
-        Task<bool> SaveModelsOfPlaylist(string playlistId, IProgressService service, List<Mp3Model> model, bool deleteOthers = true);
+        Task<List<Mp3Model>> GetModelsForPlaylist(PlaylistModel playlist, IProgressService service);
+        Task<bool> SaveModelsOfPlaylist(PlaylistModel playlist, List<Mp3Model> models);
     }
 }

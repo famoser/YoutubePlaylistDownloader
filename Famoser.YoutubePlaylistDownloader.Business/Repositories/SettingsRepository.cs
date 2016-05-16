@@ -17,7 +17,7 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Repositories
     {
         private ConfigurationModel _config;
         private CacheModel _cache;
-        private IStorageService _storageService;
+        private readonly IStorageService _storageService;
 
         public SettingsRepository(IStorageService storageService)
         {

@@ -6,14 +6,9 @@ using System.Threading.Tasks;
 
 namespace Famoser.YoutubePlaylistDownloader.Business.Models.Save
 {
-    public class PlaylistCacheModel
+    public class VideoCacheModel
     {
         public string Id { get; set; }
-        
-        public bool Download { get; set; }
-
-        public List<VideoCacheModel> DownloadedVideos { get; set; }
-
-        public List<VideoCacheModel> FailedVideos { get; set; }
+        public string FileName { get; set; }
     }
 }

@@ -14,16 +14,16 @@ using TagLib;
 
 namespace Famoser.YoutubePlaylistDownloader.Business.Services
 {
-    public class DownloadService
+    public class DownloadHelper
     {
-        public static async Task<Stream> DownloadYoutubeVideo(VideoModel vm, string folder, IProgressService service)
+        public static async Task<Stream> DownloadYoutubeVideo(VideoModel vm, IProgressService service)
         {
             try
             {
                 var downloader = new AudioDownloader();
 
                 //download video infos
-                IEnumerable<VideoInfo> videoInfos = await DownloadUrlResolver.GetDownloadUrlsAsync("https://www.youtube.com/watch?v=vxMxYgkUcdU");
+                IEnumerable<VideoInfo> videoInfos = await DownloadUrlResolver.GetDownloadUrlsAsync(vm.Link);
 
                 //Select best suited video (highest resolution)
                 VideoInfo video = downloader.ChooseBest(videoInfos);
@@ -49,11 +49,13 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Services
             {
                 if (url != null)
                 {
-                    HttpClient client = new HttpClient();
-                    var bytes = await client.GetByteArrayAsync(url);
-                    var vektor = new ByteVector(bytes);
-                    IPicture newArt = new Picture(vektor);
-                    return newArt;
+                    using (var client = new HttpClient())
+                    {
+                        var bytes = await client.GetByteArrayAsync(url);
+                        var vektor = new ByteVector(bytes);
+                        IPicture newArt = new Picture(vektor);
+                        return newArt;
+                    }
                 }
             }
             catch (Exception e)

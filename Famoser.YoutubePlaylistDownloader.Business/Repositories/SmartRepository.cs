@@ -12,11 +12,35 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Repositories
 {
     public class SmartRepository : ISmartRepository
     {
-        private ISettingsRepository _settingsRepository;
+        private readonly ISettingsRepository _settingsRepository;
 
         public SmartRepository(ISettingsRepository settingsRepository)
         {
             _settingsRepository = settingsRepository;
+        }
+
+        public void AssignMetaTags(PlaylistModel list)
+        {
+            foreach (var model in list.NewFiles)
+            {
+                model.OriginalTitle = model.VideoInfo.Name;
+                if (model.OriginalTitle.Contains("-"))
+                {
+                    var split = model.OriginalTitle.Split(new[] { "-" }, StringSplitOptions.RemoveEmptyEntries);
+                    model.Title = split[1].Trim();
+                    model.Artist = split[0].Trim();
+                }
+                else
+                {
+                    model.Title = model.VideoInfo.Name;
+                }
+
+                model.Comment = model.VideoInfo.Id;
+                model.Year = (uint)DateTime.Now.Year;
+                model.AlbumArtist = "famoser";
+                model.Album = "yout: " + list.Name;
+                model.Genre = list.Name;
+            }
         }
 
         public async Task<Uri> GetAlbumCoverUri(Mp3Model model)

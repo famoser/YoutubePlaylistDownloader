@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using Famoser.YoutubePlaylistDownloader.Business.Models.Save;
 
 namespace Famoser.YoutubePlaylistDownloader.Business.Models
 {
@@ -40,18 +41,18 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Models
             set { Set(ref _newFiles, value); }
         }
 
-        private List<string> _downloadedFiles;
-        public List<string> DownloadedFiles
+        private List<VideoModel> _downloadedVideos;
+        public List<VideoModel> DownloadedVideos
         {
-            get { return _downloadedFiles; }
-            set { Set(ref _downloadedFiles, value); }
+            get { return _downloadedVideos; }
+            set { Set(ref _downloadedVideos, value); }
         }
 
-        private List<string> _failedFiles;
-        public List<string> FailedFiles
+        private List<VideoModel> _failedVideos;
+        public List<VideoModel> FailedVideos
         {
-            get { return _failedFiles; }
-            set { Set(ref _failedFiles, value); }
+            get { return _failedVideos; }
+            set { Set(ref _failedVideos, value); }
         }
     }
 }

@@ -26,13 +26,13 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Repositories
             _folderStorageService = folderStorageService;
         }
 
-        public async Task<List<Mp3Model>> GetModelsForPlaylist(string playlistId, IProgressService service)
+        public async Task<List<Mp3Model>> GetModelsForPlaylist(PlaylistModel playlist, IProgressService service)
         {
-            var files = await _folderStorageService.GetAllFilesFromFolder(_type, Path.Combine(subFolder, playlistId));
+            var files = await _folderStorageService.GetAllFilesFromFolder(_type, Path.Combine(subFolder, playlist.Id));
             var res = new List<Mp3Model>();
             foreach (var file in files)
             {
-                var fileStream = await _folderStorageService.GetFile(_type, playlistId, file);
+                var fileStream = await _folderStorageService.GetFile(_type, playlist.Id, file);
                 var tagFile = File.Create(new StreamFileAbstraction(file,
                     fileStream, fileStream));
 
@@ -53,12 +53,19 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Repositories
             return res;
         }
 
-        public async Task<bool> SaveModelsOfPlaylist(string playlistId, IProgressService service, List<Mp3Model> models, bool deleteOthers = true)
+        public async Task<bool> SaveModelsOfPlaylist(PlaylistModel playlist, List<Mp3Model> models)
         {
             try
             {
                 foreach (var mp3Model in models)
-                { 
+                {
+                    if (mp3Model.File == null)
+                    {
+                        var fileStream = await _folderStorageService.GetFile(_type, playlist.Id, mp3Model.GetRecommendedFileName());
+                        var tagFile = File.Create(new StreamFileAbstraction(mp3Model.GetRecommendedFileName(), fileStream, fileStream));
+                        mp3Model.File = tagFile;
+                    }
+
                     //to avoid null reference exception
                     if (mp3Model.Genre == null)
                         mp3Model.Genre = "";
@@ -76,7 +83,7 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Repositories
                     mp3Model.File.Tag.Year = mp3Model.Year;
                     if (mp3Model.AlbumCover != null)
                     {
-                        var picture = await DownloadService.GetAlbumArt(mp3Model.AlbumCover);
+                        var picture = await DownloadHelper.GetAlbumArt(mp3Model.AlbumCover);
                         if (picture != null)
                         {
                             mp3Model.File.Tag.Pictures = new IPicture[1] { picture };

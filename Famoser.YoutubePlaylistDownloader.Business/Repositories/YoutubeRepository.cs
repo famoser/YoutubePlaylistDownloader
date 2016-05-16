@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Famoser.FrameworkEssentials.Logging;
+using Famoser.FrameworkEssentials.Services;
 using Famoser.FrameworkEssentials.Services.Interfaces;
 using Famoser.YoutubeDataApiWrapper.Portable.RequestBuilders;
 using Famoser.YoutubeDataApiWrapper.Portable.RequestServices;
@@ -14,6 +15,7 @@ using Famoser.YoutubeDataApiWrapper.Portable.Util;
 using Famoser.YoutubePlaylistDownloader.Business.Helpers;
 using Famoser.YoutubePlaylistDownloader.Business.Models;
 using Famoser.YoutubePlaylistDownloader.Business.Repositories.Interfaces;
+using Famoser.YoutubePlaylistDownloader.Business.Services;
 using Famoser.YoutubePlaylistDownloader.Business.Services.Interfaces;
 using Google.Apis.Auth.OAuth2;
 using Google.Apis.Services;
@@ -24,8 +26,8 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Repositories
 {
     public class YoutubeRepository : IYoutubeRepository
     {
-        private ISettingsRepository _settingsRepository;
-        private IPlatformService _platformService;
+        private readonly ISettingsRepository _settingsRepository;
+        private readonly IPlatformService _platformService;
 
         public YoutubeRepository(ISettingsRepository settingsRepository, IPlatformService platformService)
         {
@@ -33,7 +35,7 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Repositories
             _platformService = platformService;
         }
 
-        private ObservableCollection<PlaylistModel> _list = new ObservableCollection<PlaylistModel>(); 
+        private ObservableCollection<PlaylistModel> _list = new ObservableCollection<PlaylistModel>();
         public async Task<ObservableCollection<PlaylistModel>> GetPlaylists()
         {
             var cache = await _settingsRepository.GetCache();
@@ -71,11 +73,11 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Repositories
                     var oldOne = cache.CachedPlaylists.FirstOrDefault(p => p.Id == rawPlaylist.Id);
                     if (oldOne != null)
                     {
-                        model.DownloadedFiles = oldOne.DownloadedFiles;
-                        model.FailedFiles = oldOne.FailedFiles;
+                        model.DownloadedVideos = ConverterHelper.Convert(oldOne.DownloadedVideos);
+                        model.FailedVideos = ConverterHelper.Convert(oldOne.FailedVideos);
                         model.Download = oldOne.Download;
                     }
-                    
+
                     model.TotalVideos = rawPlaylist.ContentDetails.ItemCount.HasValue
                         ? (int)rawPlaylist.ContentDetails.ItemCount.Value
                         : 0;
@@ -91,8 +93,26 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Repositories
         {
             foreach (var playlist in _list.Where(p => p.Download))
             {
-                   
+                var vids = await GetVideos(playlist);
+                progressService.ConfigurePercentageProgress(vids.Count);
+                foreach (var videoModel in vids)
+                {
+                    if (playlist.DownloadedVideos.All(v => v.Id != videoModel.Id) &&
+                        playlist.FailedVideos.All(v => v.Id != videoModel.Id))
+                    {
+                        var mp3File = new Mp3Model
+                        {
+                            DownloadStream =
+                                await DownloadHelper.DownloadYoutubeVideo(videoModel, new ProgressService())
+                        };
+
+                        playlist.NewFiles.Add(mp3File);
+                    }
+
+                    progressService.IncrementPercentageProgress();
+                }
             }
+            return true;
         }
 
         private async Task<YouTubeService> GetService()
@@ -100,7 +120,7 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Repositories
             try
             {
                 UserCredential credential = await _platformService.GetGoogleWebAuthorizationCredentials();
-                
+
                 var youtubeService = new YouTubeService(new BaseClientService.Initializer()
                 {
                     HttpClientInitializer = credential,
@@ -115,7 +135,7 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Repositories
             return null;
         }
 
-        private async Task<List<VideoModel>> GetVideos(string playlistId)
+        private async Task<List<VideoModel>> GetVideos(PlaylistModel playlist)
         {
             try
             {
@@ -126,7 +146,7 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Repositories
                     //Get 5000 videos from a uploads playlist
                     var plistItemsListRequestBuilder = new PlaylistItemsListRequestBuilder(youtubeService, "snippet, contentDetails")
                     {
-                        PlaylistId = playlistId
+                        PlaylistId = playlist.Id
                     };
                     var playlistItemsRequestService =
                         new YoutubeListRequestService

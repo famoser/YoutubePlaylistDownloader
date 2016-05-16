@@ -119,7 +119,7 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Services
                 };
                 _progressService.SetProgress(pm, 0);
 
-                videoModel.IsDownloaded = await DownloadService.Instance.DownloadYoutubeVideo(videoModel, dic, pm);
+                videoModel.IsDownloaded = await DownloadHelper.Instance.DownloadYoutubeVideo(videoModel, dic, pm);
 
                 _progressService.RemoveProgress(pm);
             }

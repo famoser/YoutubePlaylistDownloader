@@ -36,7 +36,6 @@
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ViewModels\MainPageViewModel.cs" />
-    <Compile Include="ViewModels\ProgressViewModel.cs" />
     <Compile Include="ViewModels\ViewModelLocatorBase.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -10,5 +10,6 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Repositories.Interfaces
     public interface ISmartRepository
     {
         Task<Uri> GetAlbumCoverUri(Mp3Model model);
+        void AssignMetaTags(PlaylistModel list);
     }
 }
