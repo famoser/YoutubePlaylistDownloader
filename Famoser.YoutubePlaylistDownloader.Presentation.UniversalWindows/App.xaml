@@ -8,6 +8,17 @@
     <Application.Resources>
         <ResourceDictionary>
             <viewModels:ViewModelLocator x:Key="Locator" />
+            
+            <DataTemplate x:Key="PlaylistDataTemplate">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="40" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <CheckBox Grid.Column="0" IsChecked="{Binding Download, Mode=TwoWay}" />
+                    <TextBlock Grid.Column="1" Text="{Binding Name}" />
+                </Grid>
+            </DataTemplate>
 
         </ResourceDictionary>
     </Application.Resources>

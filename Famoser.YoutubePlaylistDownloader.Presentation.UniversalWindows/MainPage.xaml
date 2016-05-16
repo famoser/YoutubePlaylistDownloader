@@ -9,6 +9,7 @@
     DataContext="{Binding MainPageViewModel, Source={StaticResource Locator}}">
 
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+        <ListView ItemsSource="{Binding Playlists}" ItemTemplate="{StaticResource PlaylistDataTemplate}" />
 
     </Grid>
 </Page>

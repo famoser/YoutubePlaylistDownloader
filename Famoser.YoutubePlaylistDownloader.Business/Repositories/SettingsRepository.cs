@@ -9,6 +9,7 @@ using Famoser.YoutubePlaylistDownloader.Business.Enums;
 using Famoser.YoutubePlaylistDownloader.Business.Models;
 using Famoser.YoutubePlaylistDownloader.Business.Models.Save;
 using Famoser.YoutubePlaylistDownloader.Business.Repositories.Interfaces;
+using Famoser.YoutubePlaylistDownloader.Business.Services.Interfaces;
 using Newtonsoft.Json;
 
 namespace Famoser.YoutubePlaylistDownloader.Business.Repositories
@@ -17,11 +18,11 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Repositories
     {
         private ConfigurationModel _config;
         private CacheModel _cache;
-        private readonly IStorageService _storageService;
+        private readonly IFolderStorageService _folderStorageService;
 
-        public SettingsRepository(IStorageService storageService)
+        public SettingsRepository(IFolderStorageService folderStorageService)
         {
-            _storageService = storageService;
+            _folderStorageService = folderStorageService;
         }
 
         private bool _isInitialized = false;
@@ -31,10 +32,10 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Repositories
             {
                 if (!_isInitialized)
                 {
-                    var json = await _storageService.GetCachedTextFileAsync(FileKeys.CacheFile.ToString());
+                    var json = await _folderStorageService.GetCachedTextFileAsync(FileKeys.CacheFile.ToString());
                     _cache = json != null ? JsonConvert.DeserializeObject<CacheModel>(json) : new CacheModel();
 
-                    json = await _storageService.GetUserTextFileAsync(FileKeys.ConfigurationFile.ToString());
+                    json = await _folderStorageService.GetUserTextFileAsync(FileKeys.ConfigurationFile.ToString());
                     _config = json != null
                         ? JsonConvert.DeserializeObject<ConfigurationModel>(json)
                         : new ConfigurationModel();
@@ -61,7 +62,7 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Repositories
 
         public Task<bool> SaveCache(CacheModel cache)
         {
-            return _storageService.SetCachedTextFileAsync(FileKeys.CacheFile.ToString(),
+            return _folderStorageService.SetCachedTextFileAsync(FileKeys.CacheFile.ToString(),
                 JsonConvert.SerializeObject(cache));
         }
     }

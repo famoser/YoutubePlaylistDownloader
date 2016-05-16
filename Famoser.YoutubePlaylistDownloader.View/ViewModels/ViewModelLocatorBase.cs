@@ -24,6 +24,6 @@ namespace Famoser.YoutubePlaylistDownloader.View.ViewModels
             SimpleIoc.Default.Register<MainPageViewModel>();
         }
 
-        public MainPageViewModel MainPageViewModel { get; set; }
+        public MainPageViewModel MainPageViewModel => SimpleIoc.Default.GetInstance<MainPageViewModel>();
     }
 }

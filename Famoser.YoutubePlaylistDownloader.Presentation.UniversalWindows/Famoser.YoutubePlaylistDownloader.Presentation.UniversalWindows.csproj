@@ -96,9 +96,10 @@
       <Link>Assets\Apis\client_id.json</Link>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <None Include="..\Authentication\last_fm.json">
+    <Content Include="..\Authentication\last_fm.json">
       <Link>Assets\Apis\last_fm.json</Link>
-    </None>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <None Include="project.json" />
   </ItemGroup>
   <ItemGroup>
