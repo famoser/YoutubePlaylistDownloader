@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Famoser.FrameworkEssentials.Logging;
+using Famoser.FrameworkEssentials.Services.Interfaces;
 using Famoser.FrameworkEssentials.Singleton;
 using Famoser.YoutubePlaylistDownloader.Business.Models;
 using GalaSoft.MvvmLight.Ioc;
@@ -12,37 +13,33 @@ using File = TagLib.File;
 
 namespace Famoser.YoutubePlaylistDownloader.Business.Services
 {
-    public class WorkflowService : SingletonBase<WorkflowService>
+    public class WorkflowService
     {
         private IProgressService _progressService;
 
-        public WorkflowService()
+        public WorkflowService(IProgressService progressService)
         {
-            _progressService = SimpleIoc.Default.GetInstance<IProgressService>();
+            _progressService = progressService;
         }
 
-        public async Task<List<Mp3Model>> Execute(PlaylistModel playlist, string tempFolder, string targetFolder)
+        public async Task<List<Mp3Model>> Execute(PlaylistModel playlist)
         {
             try
             {
-                var pm = new ProgressModel()
-                {
-                    Description = "Preparing Playlist " + playlist.Name
-                };
-                _progressService.SetProgress(pm, 0);
+                _progressService.ConfigurePercentageProgress(3);
                 var vids = await YoutubeService.Instance.GetVideos(playlist.Id);
                 var tempdic = Path.Combine(tempFolder, playlist.Name);
                 var targetdic = Path.Combine(targetFolder, playlist.Name);
 
                 SortOutAlreadyKnownVideos(targetdic, playlist.Name, ref vids);
-                _progressService.SetProgress(pm, 50);
+                _progressService.IncrementPercentageProgress();
 
                 PrepareTempFolder(tempdic, ref vids);
-                _progressService.SetProgress(pm, 100);
+                _progressService.IncrementPercentageProgress();
 
                 await DownloadTempFiles(tempdic, vids);
 
-                _progressService.RemoveProgress(pm);
+                _progressService.HidePercentageProgress();
                 return RetrieveMp3Models(tempdic, targetdic, vids, playlist);
             }
             catch (Exception ex)
@@ -52,30 +49,25 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Services
             return new List<Mp3Model>();
         }
 
-        private void SortOutAlreadyKnownVideos(string dic, string playlistName, ref List<VideoModel> vids)
+        private void SortOutAlreadyKnownVideos(PlaylistModel playlist, ref List<VideoModel> vids)
         {
-            /* remove already processed files */
-            if (!Directory.Exists(dic))
-                Directory.CreateDirectory(dic);
-            else
+            string[] files = Directory.GetFiles(dic, "*.mp3", SearchOption.TopDirectoryOnly);
+            foreach (var file in files)
             {
-                string[] files = Directory.GetFiles(dic, "*.mp3", SearchOption.TopDirectoryOnly);
-                foreach (var file in files)
+                using (var fileStream = new FileStream(Path.Combine(dic, file), FileMode.Open))
                 {
-                    using (var fileStream = new FileStream(Path.Combine(dic, file), FileMode.Open))
+                    var tagFile = File.Create(new StreamFileAbstraction(fileStream.Name,
+                                     fileStream, fileStream));
+
+                    var tags = tagFile.GetTag(TagTypes.Id3v2);
+                    var comm = tags.Comment;
+                    var item = vids.FirstOrDefault(v => v.Id == comm);
+                    tags.AmazonId
+                    if (item != null)
                     {
-                        var tagFile = File.Create(new StreamFileAbstraction(fileStream.Name,
-                                         fileStream, fileStream));
+                        ForceTagsInTargetFolder(tagFile, playlistName);
+                        vids.Remove(item);
 
-                        var tags = tagFile.GetTag(TagTypes.Id3v2);
-                        var comm = tags.Comment;
-                        var item = vids.FirstOrDefault(v => v.Id == comm);
-                        if (item != null)
-                        {
-                            ForceTagsInTargetFolder(tagFile, playlistName);
-                            vids.Remove(item);
-
-                        }
                     }
                 }
             }

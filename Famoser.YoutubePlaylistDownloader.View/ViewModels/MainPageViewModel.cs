@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Famoser.YoutubePlaylistDownloader.Business.Models;
+using Famoser.YoutubePlaylistDownloader.Business.Models.Save;
 using Famoser.YoutubePlaylistDownloader.Business.Services;
 using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Command;
@@ -66,7 +67,7 @@ namespace Famoser.YoutubePlaylistDownloader.View.ViewModels
             }
         }
 
-        private SaveModel _state;
+        private CacheModel _state;
 
         private bool _getPlaylistsActive;
         private RelayCommand _getPlaylistsCommand;
@@ -110,7 +111,7 @@ namespace Famoser.YoutubePlaylistDownloader.View.ViewModels
 
         public void SaveState()
         {
-            _state = new SaveModel()
+            _state = new CacheModel()
             {
                 TempFolder = TempFolder,
                 TargetFolder = TargetFolder,

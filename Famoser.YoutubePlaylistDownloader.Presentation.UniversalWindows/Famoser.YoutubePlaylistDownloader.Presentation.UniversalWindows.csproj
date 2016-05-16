@@ -4,7 +4,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
-    <ProjectGuid>{54CC9954-C682-44A9-A93E-695D41569BD7}</ProjectGuid>
+    <ProjectGuid>{4174C2C3-01E2-4FD8-9297-AD3BB7F23410}</ProjectGuid>
     <OutputType>AppContainerExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Famoser.YoutubePlaylistDownloader.Presentation.UniversalWindows</RootNamespace>
@@ -92,6 +92,13 @@
     <Content Include="ApplicationInsights.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="..\Authentication\client_id.json">
+      <Link>Assets\Apis\client_id.json</Link>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <None Include="..\Authentication\last_fm.json">
+      <Link>Assets\Apis\last_fm.json</Link>
+    </None>
     <None Include="project.json" />
   </ItemGroup>
   <ItemGroup>
@@ -101,6 +108,7 @@
     <Compile Include="MainPage.xaml.cs">
       <DependentUpon>MainPage.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Platform\PlatformService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ViewModels\ViewModelLocator.cs" />
   </ItemGroup>
@@ -131,7 +139,14 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="System, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL" />
+    <ProjectReference Include="..\Famoser.YoutubePlaylistDownloader.Business\Famoser.YoutubePlaylistDownloader.Business.csproj">
+      <Project>{e66988d1-d2cb-471b-8eeb-da8a09052d1c}</Project>
+      <Name>Famoser.YoutubePlaylistDownloader.Business</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Famoser.YoutubePlaylistDownloader.View\Famoser.YoutubePlaylistDownloader.View.csproj">
+      <Project>{898d2308-5c3e-4897-b52b-fee7e89d076f}</Project>
+      <Name>Famoser.YoutubePlaylistDownloader.View</Name>
+    </ProjectReference>
   </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">
     <VisualStudioVersion>14.0</VisualStudioVersion>

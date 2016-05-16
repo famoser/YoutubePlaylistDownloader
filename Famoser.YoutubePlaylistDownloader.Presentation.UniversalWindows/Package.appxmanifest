@@ -7,11 +7,11 @@
   IgnorableNamespaces="uap mp">
 
   <Identity
-    Name="02737fe8-7498-4fa8-9c65-bdda6f98d555"
+    Name="54c57599-f8b0-43ab-964a-496cd261e89d"
     Publisher="CN=famoser"
     Version="1.0.0.0" />
 
-  <mp:PhoneIdentity PhoneProductId="02737fe8-7498-4fa8-9c65-bdda6f98d555" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
+  <mp:PhoneIdentity PhoneProductId="54c57599-f8b0-43ab-964a-496cd261e89d" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 
   <Properties>
     <DisplayName>Famoser.YoutubePlaylistDownloader.Presentation.UniversalWindows</DisplayName>

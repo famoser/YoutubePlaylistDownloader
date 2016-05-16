@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using TagLib;
 
 namespace Famoser.YoutubePlaylistDownloader.Business.Models
 {
@@ -69,21 +70,17 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Models
             set { Set(ref _albumCover, value); }
         }
 
-        public string FilePath { get; set; }
-        public string TargetFolder { get; set; }
-        public string TargetFilePath
-        {
-            get
-            {
-                var filename = Path.GetInvalidFileNameChars().Aggregate(Artist + " - " + Title + ".mp3", (current, c) => current.Replace(c.ToString(), string.Empty));
-                return Path.Combine(TargetFolder, filename);
-            }
-        }
+        public File File { get; set; }
 
         public bool AllImportantPropertiesFilled => !string.IsNullOrEmpty(Title) &&
                                                     !string.IsNullOrEmpty(Artist) &&
                                                     !string.IsNullOrEmpty(Album) &&
                                                     !string.IsNullOrEmpty(AlbumArtist) &&
                                                     !string.IsNullOrEmpty(Genre);
+
+        public string GetRecommendedFileName()
+        {
+            return Path.GetInvalidFileNameChars().Aggregate(Artist + " - " + Title + ".mp3", (current, c) => current.Replace(c.ToString(), string.Empty));
+        }
     }
 }

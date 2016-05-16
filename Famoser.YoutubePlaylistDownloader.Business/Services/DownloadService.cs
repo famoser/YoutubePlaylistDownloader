@@ -14,9 +14,9 @@ using TagLib;
 
 namespace Famoser.YoutubePlaylistDownloader.Business.Services
 {
-    public class DownloadService : SingletonBase<DownloadService>
+    public class DownloadService
     {
-        public async Task<Stream> DownloadYoutubeVideo(VideoModel vm, string folder, IProgressService service)
+        public static async Task<Stream> DownloadYoutubeVideo(VideoModel vm, string folder, IProgressService service)
         {
             try
             {
@@ -43,7 +43,7 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Services
             return null;
         }
 
-        public async Task<IPicture> GetAlbumArt(Uri url)
+        public static async Task<IPicture> GetAlbumArt(Uri url)
         {
             try
             {

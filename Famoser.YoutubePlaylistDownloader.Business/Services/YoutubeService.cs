@@ -5,6 +5,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using Famoser.FrameworkEssentials.Logging;
 using Famoser.FrameworkEssentials.Singleton;
+using Famoser.YoutubeDataApiWrapper.Portable.RequestBuilders;
+using Famoser.YoutubeDataApiWrapper.Portable.RequestServices;
+using Famoser.YoutubeDataApiWrapper.Portable.Util;
 using Famoser.YoutubePlaylistDownloader.Business.Models;
 using Google.Apis.Auth.OAuth2;
 using Google.Apis.Services;
@@ -23,7 +26,6 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Services
 
                 if (youtubeService != null)
                 {
-
                     var channelrequestTask = youtubeService.Channels.List("id");
                     channelrequestTask.Mine = true;
 
@@ -68,90 +70,12 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Services
             return new List<PlaylistModel>();
         }
 
-        public async Task<PlaylistModel> GetPlaylistByLink(string link)
-        {
-            try
-            {
-                var youtubeService = await GetService();
-
-                if (youtubeService != null)
-                {
-                    var id = link.Substring(link.LastIndexOf("list=", StringComparison.Ordinal) + "list=".Length);
-                    
-                    var playlistrequestTask = youtubeService.Playlists.List("snippet, contentDetails");
-                    playlistrequestTask.Id = id;
-
-                    var response = await playlistrequestTask.ExecuteAsync();
-                    if (response.Items.Any())
-                    {
-                        //if (rawPlaylist.ContentDetails)
-                        var model = new PlaylistModel()
-                        {
-                            Id = response.Items[0].Id,
-                            Name = response.Items[0].Snippet.Title,
-
-                        };
-                        model.TotalVideos = response.Items[0].ContentDetails.ItemCount.HasValue
-                            ? (int)response.Items[0].ContentDetails.ItemCount.Value
-                            : 0;
-
-                        return model;
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                LogHelper.Instance.LogException(ex);
-            }
-            return null;
-        }
-
-
-        public async Task<List<VideoModel>> GetVideos(string playlistId)
-        {
-            try
-            {
-                var youtubeService = await GetService();
-
-                if (youtubeService != null)
-                {
-                    //Get 5000 videos from a uploads playlist
-                    var plistItemsListRequestBuilder = new PlaylistItemsListRequestBuilder(youtubeService, "snippet, contentDetails")
-                    {
-                        PlaylistId = playlistId
-                    };
-                    var playlistItemsRequestService =
-                        new YoutubeListRequestService
-                            <PlaylistItemsResource.ListRequest, PlaylistItemListResponse, PlaylistItem>
-                            (plistItemsListRequestBuilder);
-
-                    var obj = await playlistItemsRequestService.ExecuteConcurrentAsync(new PageTokenRequestRange(5000));
-
-                    var res = new List<VideoModel>();
-                    foreach (var playlistItem in obj)
-                    {
-                        var model = new VideoModel()
-                        {
-                            Id = playlistItem.ContentDetails.VideoId,
-                            Name = playlistItem.Snippet.Title
-                        };
-                        res.Add(model);
-                    }
-                    return res;
-                }
-            }
-            catch (Exception ex)
-            {
-                LogHelper.Instance.LogException(ex);
-            }
-            return new List<VideoModel>();
-        }
-
         private async Task<YouTubeService> GetService()
         {
             try
             {
                 UserCredential credential;
+                
                 using (var stream = new FileStream("Files/client_id.json", FileMode.Open, FileAccess.Read))
                 {
                     credential = await GoogleWebAuthorizationBroker.AuthorizeAsync(
