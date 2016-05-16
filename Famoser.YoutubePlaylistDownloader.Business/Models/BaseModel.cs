@@ -1,6 +1,6 @@
 ﻿using GalaSoft.MvvmLight;
 
-namespace YoutubePlaylistDownloader.Business.Models
+namespace Famoser.YoutubePlaylistDownloader.Business.Models
 {
     public class BaseModel : ObservableObject
     {

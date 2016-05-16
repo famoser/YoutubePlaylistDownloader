@@ -1,12 +1,10 @@
 ﻿using System;
-using System.IO;
 using Famoser.FrameworkEssentials.Logging;
 using Famoser.FrameworkEssentials.Singleton;
-using GalaSoft.MvvmLight.Ioc;
+using Famoser.YoutubePlaylistDownloader.Business.Models;
 using Newtonsoft.Json;
-using YoutubePlaylistDownloader.Business.Models;
 
-namespace YoutubePlaylistDownloader.Business.Services
+namespace Famoser.YoutubePlaylistDownloader.Business.Services
 {
     public class SaveService : SingletonBase<SaveService>
     {

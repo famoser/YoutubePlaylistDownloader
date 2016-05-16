@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace YoutubePlaylistDownloader.Business.Models
+namespace Famoser.YoutubePlaylistDownloader.Business.Models
 {
     public class Mp3Model : BaseModel
     {

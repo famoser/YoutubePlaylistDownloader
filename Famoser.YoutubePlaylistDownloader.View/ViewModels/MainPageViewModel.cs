@@ -1,15 +1,14 @@
 ﻿using System;
 using System.Collections.ObjectModel;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using Famoser.YoutubePlaylistDownloader.Business.Models;
+using Famoser.YoutubePlaylistDownloader.Business.Services;
 using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Command;
-using YoutubePlaylistDownloader.Business.Models;
-using YoutubePlaylistDownloader.Business.Services;
 
-namespace YoutubePlaylistDownloader.View.ViewModels
+namespace Famoser.YoutubePlaylistDownloader.View.ViewModels
 {
     public class MainPageViewModel : ViewModelBase
     {

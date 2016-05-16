@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace YoutubePlaylistDownloader.Business.Models
+﻿namespace Famoser.YoutubePlaylistDownloader.Business.Models
 {
     public class ProgressModel
     {

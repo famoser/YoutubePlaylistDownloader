@@ -1,20 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Net;
-using System.Text;
 using System.Threading.Tasks;
 using Famoser.FrameworkEssentials.Logging;
 using Famoser.FrameworkEssentials.Services.Interfaces;
 using Famoser.FrameworkEssentials.Singleton;
+using Famoser.YoutubePlaylistDownloader.Business.Models;
 using GalaSoft.MvvmLight.Ioc;
 using IF.Lastfm.Core.Api;
-using IF.Lastfm.Core.Objects;
 using TagLib;
-using YoutubePlaylistDownloader.Business.Models;
 
-namespace YoutubePlaylistDownloader.Business.Services
+namespace Famoser.YoutubePlaylistDownloader.Business.Services
 {
     public class Mp3Service : SingletonBase<Mp3Service>
     {

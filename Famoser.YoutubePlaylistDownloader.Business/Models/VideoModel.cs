@@ -1,4 +1,4 @@
-﻿namespace YoutubePlaylistDownloader.Business.Models
+﻿namespace Famoser.YoutubePlaylistDownloader.Business.Models
 {
     public class VideoModel : BaseModel
     {

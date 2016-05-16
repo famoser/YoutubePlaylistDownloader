@@ -1,22 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Famoser.FrameworkEssentials.Logging;
 using Famoser.FrameworkEssentials.Singleton;
+using Famoser.YoutubePlaylistDownloader.Business.Models;
 using Google.Apis.Auth.OAuth2;
 using Google.Apis.Services;
-using Google.Apis.Util.Store;
 using Google.Apis.YouTube.v3;
 using Google.Apis.YouTube.v3.Data;
-using YoutubePlaylistDownloader.Business.Models;
-using YouTubeDataApiWrapper.RequestBuilders;
-using YouTubeDataApiWrapper.RequestServices;
-using YouTubeDataApiWrapper.Util;
 
-namespace YoutubePlaylistDownloader.Business.Services
+namespace Famoser.YoutubePlaylistDownloader.Business.Services
 {
     public class YoutubeService : SingletonBase<YoutubeService>
     {

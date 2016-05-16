@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Net;
 using System.Net.Http;
-using System.Text;
 using System.Threading.Tasks;
 using Famoser.FrameworkEssentials.Logging;
 using Famoser.FrameworkEssentials.Services.Interfaces;
@@ -12,12 +9,10 @@ using Famoser.FrameworkEssentials.Singleton;
 using Famoser.YoutubeExtractor.Portable.Downloaders;
 using Famoser.YoutubeExtractor.Portable.Helpers;
 using Famoser.YoutubeExtractor.Portable.Models;
-using GalaSoft.MvvmLight.Ioc;
+using Famoser.YoutubePlaylistDownloader.Business.Models;
 using TagLib;
-using YoutubePlaylistDownloader.Business.Models;
-using File = TagLib.File;
 
-namespace YoutubePlaylistDownloader.Business.Services
+namespace Famoser.YoutubePlaylistDownloader.Business.Services
 {
     public class DownloadService : SingletonBase<DownloadService>
     {

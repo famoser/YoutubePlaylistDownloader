@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace YoutubePlaylistDownloader.Business.Models
+namespace Famoser.YoutubePlaylistDownloader.Business.Models
 {
     public class SaveModel
     {

@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Famoser.YoutubePlaylistDownloader.Business.Models;
 using GalaSoft.MvvmLight;
-using YoutubePlaylistDownloader.Business.Models;
 
-namespace YoutubePlaylistDownloader.View.ViewModels
+namespace Famoser.YoutubePlaylistDownloader.View.ViewModels
 {
     public class ProgressViewModel : ViewModelBase
     {

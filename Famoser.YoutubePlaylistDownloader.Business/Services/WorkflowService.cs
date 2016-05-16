@@ -2,17 +2,15 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Famoser.FrameworkEssentials.Logging;
 using Famoser.FrameworkEssentials.Singleton;
+using Famoser.YoutubePlaylistDownloader.Business.Models;
 using GalaSoft.MvvmLight.Ioc;
 using TagLib;
-using YoutubePlaylistDownloader.Business.Models;
-using YoutubePlaylistDownloader.Business.Services.Interfaces;
 using File = TagLib.File;
 
-namespace YoutubePlaylistDownloader.Business.Services
+namespace Famoser.YoutubePlaylistDownloader.Business.Services
 {
     public class WorkflowService : SingletonBase<WorkflowService>
     {
