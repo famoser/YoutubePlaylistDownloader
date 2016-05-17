@@ -42,7 +42,7 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Helpers
             return null;
         }
 
-        public static async Task<IPicture> GetAlbumArt(Uri url)
+        public static async Task<byte[]> DownloadBytes(Uri url)
         {
             try
             {
@@ -51,9 +51,7 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Helpers
                     using (var client = new HttpClient())
                     {
                         var bytes = await client.GetByteArrayAsync(url);
-                        var vektor = new ByteVector(bytes);
-                        IPicture newArt = new Picture(vektor);
-                        return newArt;
+                        return bytes;
                     }
                 }
             }

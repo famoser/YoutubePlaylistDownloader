@@ -2,10 +2,15 @@
 {
     public enum SaveStatus
     {
-        DownloadPending = 1,
-        DownloadSucceeded = 2,
-        Saved = 3,
+        Discovered = 0,
+        DownloadPending = 10,
+        Downloading = 11,
+        Converting = 12,
+        Saving = 13,
+        Finished = 20,
 
-        DownloadFailed = 10
+        FailedDownloading = 111,
+        FailedConverting = 112,
+        FailedSaving = 113
     }
 }

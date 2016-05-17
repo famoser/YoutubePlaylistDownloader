@@ -5,10 +5,11 @@ using Famoser.YoutubePlaylistDownloader.Business.Models;
 
 namespace Famoser.YoutubePlaylistDownloader.Business.Repositories.Interfaces
 {
-    public interface IYoutubeRepository
+    public interface IPlaylistRepository
     {
         Task<ObservableCollection<PlaylistModel>> GetPlaylists();
+        Task<bool> RefreshPlaylists(IProgressService progressService);
         Task<bool> DownloadVideos(IProgressService progressService);
-        Task<PlaylistModel> GetPlaylistByLink(string link);
+        Task<bool> AddNewPlaylistByLink(string link);
     }
 }

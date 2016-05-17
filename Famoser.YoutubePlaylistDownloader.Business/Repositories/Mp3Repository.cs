@@ -12,6 +12,7 @@ using Famoser.YoutubePlaylistDownloader.Business.Models;
 using Famoser.YoutubePlaylistDownloader.Business.Models.Save;
 using Famoser.YoutubePlaylistDownloader.Business.Repositories.Interfaces;
 using Famoser.YoutubePlaylistDownloader.Business.Services.Interfaces;
+using Newtonsoft.Json;
 using TagLib;
 using TagLib.Id3v2;
 
@@ -20,102 +21,34 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Repositories
     public class Mp3Repository : IMp3Respository
     {
         private readonly IFolderStorageService _folderStorageService;
-        private readonly ISettingsRepository _settingsRepository;
-        private static readonly FolderType _type = FolderType.Music;
-        private static readonly string subFolder = "youtube";
+        private static readonly FolderType Type = FolderType.Music;
+        private static readonly string SubFolder = "youtube";
 
-        public Mp3Repository(IFolderStorageService folderStorageService, ISettingsRepository settingsRepository)
+        public Mp3Repository(IFolderStorageService folderStorageService)
         {
             _folderStorageService = folderStorageService;
-            _settingsRepository = settingsRepository;
         }
-
-        /// <summary>
-        /// disabled
-        /// </summary>
-        /// <param name="playlist"></param>
-        /// <param name="service"></param>
-        /// <returns></returns>
-        public async Task<List<Mp3Model>> GetModelsForPlaylist(PlaylistModel playlist, IProgressService service)
-        {
-            var files = await _folderStorageService.GetAllFilesFromFolder(_type, Path.Combine(subFolder, playlist.Id));
-            var res = new List<Mp3Model>();
-            foreach (var file in files)
-            {
-                var fileStream = await _folderStorageService.GetFile(_type, playlist.Id, file);
-                var tagFile = File.Create(new StreamFileAbstraction(file,
-                    fileStream, fileStream));
-
-                var tags = (TagLib.Id3v2.Tag)tagFile.GetTag(TagTypes.Id3v2);
-                PrivateFrame p = PrivateFrame.Get(tags, "CustomKey", true);
-                p.PrivateData = Encoding.Unicode.GetBytes("Sample Value");
-                var model = new Mp3Model()
-                {
-                    Album = tags.Album,
-                    AlbumArtist = tags.AlbumArtists.FirstOrDefault(),
-                    Artist = tags.Performers.FirstOrDefault(),
-                    Comment = tags.Comment,
-                    Genre = tags.Genres.FirstOrDefault(),
-                    Title = tags.Title,
-                    Year = tags.Year,
-                    Mp3File = tagFile
-                };
-                res.Add(model);
-            }
-            return res;
-        }
-
-        public async Task<bool> SavePlaylists(IList<PlaylistModel> playlists)
+        
+        public async Task<bool> LoadFile(Mp3Model model)
         {
             try
             {
-                foreach (var playlist in playlists)
+                var fileStream = await _folderStorageService.GetFile(Type, model.SavePath);
+                var tagFile = File.Create(new StreamFileAbstraction(model.SavePath,
+                    fileStream, fileStream));
+
+                model.Title = tagFile.Tag.Title;
+                model.Album = tagFile.Tag.Album;
+                model.Artist = string.Join(", ", tagFile.Tag.Performers);
+                model.AlbumArtist = string.Join(", ", tagFile.Tag.AlbumArtists);
+                model.Genre = string.Join(", ", tagFile.Tag.Genres);
+                model.Year = tagFile.Tag.Year;
+
+                if (tagFile.Tag.Pictures != null)
                 {
-                    foreach (var mp3Model in playlist.Videos)
-                    {
-                        if (mp3Model.Mp3File == null)
-                        {
-                            var fileStream = await _folderStorageService.GetFile(_type, playlist.Id, mp3Model.GetRecommendedFileName());
-                            var tagFile = File.Create(new StreamFileAbstraction(mp3Model.GetRecommendedFileName(), fileStream, fileStream));
-                            mp3Model.Mp3File = tagFile;
-                        }
-
-                        //to avoid null reference exception
-                        if (mp3Model.Genre == null)
-                            mp3Model.Genre = "";
-                        if (mp3Model.AlbumArtist == null)
-                            mp3Model.AlbumArtist = "";
-                        if (mp3Model.Artist == null)
-                            mp3Model.Artist = "";
-
-                        mp3Model.Mp3File.Tag.Album = mp3Model.Album;
-                        mp3Model.Mp3File.Tag.AlbumArtists = new[] { mp3Model.AlbumArtist };
-                        mp3Model.Mp3File.Tag.Performers = new[] { mp3Model.Artist };
-                        mp3Model.Mp3File.Tag.Title = mp3Model.Title;
-                        mp3Model.Mp3File.Tag.Comment = mp3Model.Comment;
-                        mp3Model.Mp3File.Tag.Genres = new[] { mp3Model.Genre };
-                        mp3Model.Mp3File.Tag.Year = mp3Model.Year;
-                        if (mp3Model.AlbumCover != null)
-                        {
-                            var picture = await DownloadHelper.GetAlbumArt(mp3Model.AlbumCover);
-                            if (picture != null)
-                            {
-                                mp3Model.Mp3File.Tag.Pictures = new IPicture[1] { picture };
-                            }
-                        }
-                        mp3Model.Mp3File.Save();
-                    }
-
-                    playlist.DownloadedVideos.AddRange(playlist.Videos.Select(e => e.VideoInfo));
-                    playlist.Videos.Clear();
+                    var pic = tagFile.Tag.Pictures.FirstOrDefault();
+                    model.AlbumCover = pic.Data.Data;
                 }
-
-                var cacheModel = new CacheModel()
-                {
-                    CachedPlaylists = ConverterHelper.Convert(playlists)
-                };
-                await _settingsRepository.SaveCache(cacheModel);
-
 
                 return true;
             }
@@ -124,6 +57,80 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Repositories
                 LogHelper.Instance.LogException(ex);
             }
             return false;
+        }
+
+        public async Task<bool> SaveFile(Mp3Model model)
+        {
+            try
+            {
+                var fileStream = await _folderStorageService.GetFile(Type, model.SavePath);
+                var tagFile = File.Create(new StreamFileAbstraction(model.SavePath, fileStream, fileStream));
+                
+                //save all tags
+                tagFile.Tag.Album = model.Album;
+                tagFile.Tag.Title = model.Title;
+                tagFile.Tag.AlbumArtists = model.AlbumArtist.Split(new []{", "}, StringSplitOptions.RemoveEmptyEntries);
+                tagFile.Tag.Performers = model.Artist.Split(new[] { ", " }, StringSplitOptions.RemoveEmptyEntries);
+                tagFile.Tag.Genres = model.Genre.Split(new[] { ", " }, StringSplitOptions.RemoveEmptyEntries);
+                tagFile.Tag.Year = model.Year;
+
+                //save image
+                if (model.AlbumCover != null && model.AlbumCover.Length > 0)
+                {
+                    var vektor = new ByteVector(model.AlbumCover);
+                    IPicture newArt = new Picture(vektor);
+                    tagFile.Tag.Pictures = new IPicture[1] { newArt };
+                }
+                else
+                {
+                    tagFile.Tag.Pictures = new IPicture[0];
+                }
+
+                // save meta data
+                var id3Tag = tagFile.GetTag(TagTypes.Id3v2);
+                if (id3Tag is TagLib.Id3v2.Tag)
+                {
+                    PrivateFrame mp3Json = PrivateFrame.Get(id3Tag as TagLib.Id3v2.Tag, "ypdjson", true);
+                    mp3Json.PrivateData = Encoding.Unicode.GetBytes(JsonConvert.SerializeObject(Mp3Helper.GetMp3FileMetaData(model)));
+                }
+
+                tagFile.Save();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.Instance.LogException(ex);
+            }
+            return false;
+        }
+
+        public async Task<Mp3Model> CreateFile(VideoModel video, Stream fileStream)
+        {
+            try
+            {
+                var mp3Model = new Mp3Model()
+                {
+                    Title = video.Name,
+                    VideoInfo = video
+                };
+
+                var filePath = GetRecommendedFilePath(mp3Model);
+                if (await _folderStorageService.SaveFile(Type, filePath, fileStream))
+                {
+                    mp3Model.SavePath = filePath;
+                    return mp3Model;
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.Instance.LogException(ex);
+            }
+            return null;
+        }
+
+        private string GetRecommendedFilePath(Mp3Model model)
+        {
+            return Path.Combine(SubFolder, model.VideoInfo.PlaylistModel.Id, model.GetRecommendedFileName());
         }
     }
 }

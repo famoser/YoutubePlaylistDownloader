@@ -8,12 +8,11 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Services.Interfaces
 {
     public interface IFolderStorageService : IStorageService
     {
+        Task<Stream> GetFile(FolderType type, string path);
+        Task<bool> SaveFile(FolderType type, string path, Stream stream);
+        Task<bool> MoveFile(FolderType type, string path, string newPath);
+
         Task<List<string>> GetAllFilesFromFolder(FolderType type, string folder);
-
-        Task<Stream> GetFile(FolderType type, string path, string fileName);
-
-        Task<bool> SaveFile(FolderType type, string path, string filename, Stream stream);
-
-        Task<bool> DeleteFiles(FolderType type, string folder, List<string> files);
+        Task<bool> DeleteFilesInFolder(FolderType type, string path, List<string> files);
     }
 }

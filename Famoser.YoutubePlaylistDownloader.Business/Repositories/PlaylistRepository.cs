@@ -10,6 +10,7 @@ using Famoser.YoutubeDataApiWrapper.Portable.RequestBuilders;
 using Famoser.YoutubeDataApiWrapper.Portable.RequestServices;
 using Famoser.YoutubeDataApiWrapper.Portable.Util;
 using Famoser.YoutubePlaylistDownloader.Business.Helpers;
+using Famoser.YoutubePlaylistDownloader.Business.Helpers.Converters;
 using Famoser.YoutubePlaylistDownloader.Business.Models;
 using Famoser.YoutubePlaylistDownloader.Business.Repositories.Interfaces;
 using Famoser.YoutubePlaylistDownloader.Business.Services.Interfaces;
@@ -20,95 +21,140 @@ using Google.Apis.YouTube.v3.Data;
 
 namespace Famoser.YoutubePlaylistDownloader.Business.Repositories
 {
-    public class YoutubeRepository : IYoutubeRepository
+    public class PlaylistRepository : IPlaylistRepository
     {
         private readonly ISettingsRepository _settingsRepository;
         private readonly IPlatformService _platformService;
 
-        public YoutubeRepository(ISettingsRepository settingsRepository, IPlatformService platformService)
+        public PlaylistRepository(ISettingsRepository settingsRepository, IPlatformService platformService)
         {
             _settingsRepository = settingsRepository;
             _platformService = platformService;
         }
 
-        private ObservableCollection<PlaylistModel> _list = new ObservableCollection<PlaylistModel>();
+        private ObservableCollection<PlaylistModel> _list;
         public async Task<ObservableCollection<PlaylistModel>> GetPlaylists()
         {
-            var cache = await _settingsRepository.GetCache();
-            var youtubeService = await GetService();
-
-            if (youtubeService != null)
+            try
             {
-                var channelrequestTask = youtubeService.Channels.List("id");
-                channelrequestTask.Mine = true;
-
-                var channelrequest = await channelrequestTask.ExecuteAsync();
-                var channelId = channelrequest.Items[0].Id;
-
-                var playlistrequestTask = youtubeService.Playlists.List("snippet,contentDetails");
-                playlistrequestTask.ChannelId = channelId;
-                var rawPlaylists = new List<Playlist>();
-
-                var response = await playlistrequestTask.ExecuteAsync();
-                rawPlaylists.AddRange(response.Items);
-                while (response.NextPageToken != null)
+                if (_list == null)
                 {
-                    playlistrequestTask.PageToken = response.NextPageToken;
-                    response = await playlistrequestTask.ExecuteAsync();
-                    rawPlaylists.AddRange(response.Items);
+                    _list = new ObservableCollection<PlaylistModel>();
+                    var cache = await _settingsRepository.GetCache();
+                    if (cache != null)
+                    {
+                        var converter = new PlaylistConverter();
+                        foreach (var playlist in cache.CachedPlaylists)
+                        {
+                            _list.Add(converter.Convert(playlist));
+                        }
+                    }
                 }
+                return _list;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.Instance.LogException(ex);
+                _list = new ObservableCollection<PlaylistModel>();
+            }
+            return _list;
+        }
 
-                var res = new List<PlaylistModel>();
-                foreach (var rawPlaylist in rawPlaylists)
+        public async Task<bool> RefreshPlaylists(IProgressService progressService)
+        {
+            try
+            {
+                var youtubeService = await GetService();
+
+                if (youtubeService != null)
                 {
-                    var model = new PlaylistModel()
+                    var channelrequestTask = youtubeService.Channels.List("id");
+                    channelrequestTask.Mine = true;
+
+                    var channelrequest = await channelrequestTask.ExecuteAsync();
+                    var channelId = channelrequest.Items[0].Id;
+
+                    var playlistrequestTask = youtubeService.Playlists.List("snippet,contentDetails");
+                    playlistrequestTask.ChannelId = channelId;
+                    var rawPlaylists = new List<Playlist>();
+
+                    var response = await playlistrequestTask.ExecuteAsync();
+                    rawPlaylists.AddRange(response.Items);
+                    while (response.NextPageToken != null)
                     {
-                        Id = rawPlaylist.Id,
-                        Name = rawPlaylist.Snippet.Title,
-                    };
-                    var oldOne = cache.CachedPlaylists.FirstOrDefault(p => p.Id == rawPlaylist.Id);
-                    if (oldOne != null)
-                    {
-                        model.DownloadedVideos = ConverterHelper.Convert(oldOne.DownloadedVideos);
-                        model.FailedVideos = ConverterHelper.Convert(oldOne.FailedVideos);
-                        model.Refresh = oldOne.Download;
+                        playlistrequestTask.PageToken = response.NextPageToken;
+                        response = await playlistrequestTask.ExecuteAsync();
+                        rawPlaylists.AddRange(response.Items);
                     }
 
-                    model.TotalVideos = rawPlaylist.ContentDetails.ItemCount.HasValue
-                        ? (int)rawPlaylist.ContentDetails.ItemCount.Value
-                        : 0;
-                    res.Add(model);
+                    foreach (var rawPlaylist in rawPlaylists)
+                    {
+                        PlaylistModel model;
+                        if (_list.All(l => l.Id != rawPlaylist.Id))
+                        {
+                            model = new PlaylistModel()
+                            {
+                                Id = rawPlaylist.Id,
+                                Name = rawPlaylist.Snippet.Title,
+                            };
+                            InsertInOrder(model);
+                        }
+                    }
+                    return true;
                 }
-                _list = new ObservableCollection<PlaylistModel>(res.OrderBy(p => p.Name));
             }
-
-            return _list;
+            catch (Exception ex)
+            {
+                LogHelper.Instance.LogException(ex);
+            }
+            return false;
         }
 
         public async Task<bool> DownloadVideos(IProgressService progressService)
         {
-            foreach (var playlist in _list.Where(p => p.Refresh))
+            try
             {
-                var vids = await GetVideos(playlist);
-                progressService.ConfigurePercentageProgress(vids.Count);
-                foreach (var videoModel in vids)
+                foreach (var playlist in _list.Where(p => p.Refresh))
                 {
-                    if (playlist.DownloadedVideos.All(v => v.Id != videoModel.Id) &&
-                        playlist.FailedVideos.All(v => v.Id != videoModel.Id))
+                    var vids = await GetVideos(playlist);
+                    progressService.ConfigurePercentageProgress(vids.Count);
+                    foreach (var videoModel in vids)
                     {
-                        var mp3File = new Mp3Model
+                        if (playlist.DownloadedVideos.All(v => v.Id != videoModel.Id) &&
+                            playlist.FailedVideos.All(v => v.Id != videoModel.Id))
                         {
-                            DownloadStream =
-                                await DownloadHelper.DownloadYoutubeVideo(videoModel, new ProgressService())
-                        };
+                            var mp3File = new Mp3Model
+                            {
+                                DownloadStream =
+                                    await DownloadHelper.DownloadYoutubeVideo(videoModel, new ProgressService())
+                            };
 
-                        playlist.Videos.Add(mp3File);
+                            playlist.Videos.Add(mp3File);
+                        }
+
+                        progressService.IncrementPercentageProgress();
                     }
+                }
+                return true;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.Instance.LogException(ex);
+            }
+            return false;
+        }
 
-                    progressService.IncrementPercentageProgress();
+        private void InsertInOrder(PlaylistModel model)
+        {
+            for (int i = 0; i < _list.Count; i++)
+            {
+                if (string.Compare(_list[i].Name, model.Name, StringComparison.Ordinal) > 0)
+                {
+                    _list.Insert(i, model);
+                    return;
                 }
             }
-            return true;
+            _list.Add(model);
         }
 
         private async Task<YouTubeService> GetService()
@@ -170,8 +216,8 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Repositories
             }
             return new List<VideoModel>();
         }
-        
-        public async Task<PlaylistModel> GetPlaylistByLink(string link)
+
+        public async Task<bool> AddNewPlaylistByLink(string link)
         {
             try
             {
@@ -191,13 +237,10 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Repositories
                         {
                             Id = response.Items[0].Id,
                             Name = response.Items[0].Snippet.Title,
-
                         };
-                        model.TotalVideos = response.Items[0].ContentDetails.ItemCount.HasValue
-                            ? (int)response.Items[0].ContentDetails.ItemCount.Value
-                            : 0;
+                        InsertInOrder(model);
 
-                        return model;
+                        return true;
                     }
                 }
             }
@@ -205,7 +248,7 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Repositories
             {
                 LogHelper.Instance.LogException(ex);
             }
-            return null;
+            return false;
         }
     }
 }

@@ -14,7 +14,7 @@ namespace Famoser.YoutubePlaylistDownloader.View.ViewModels
             SimpleIoc.Default.Register<IMp3Respository, Mp3Repository>();
             SimpleIoc.Default.Register<ISettingsRepository, SettingsRepository>();
             SimpleIoc.Default.Register<ISmartRepository, SmartRepository>();
-            SimpleIoc.Default.Register<IYoutubeRepository, YoutubeRepository>();
+            SimpleIoc.Default.Register<IPlaylistRepository, PlaylistRepository>();
                 
             SimpleIoc.Default.Register<MainPageViewModel>();
         }

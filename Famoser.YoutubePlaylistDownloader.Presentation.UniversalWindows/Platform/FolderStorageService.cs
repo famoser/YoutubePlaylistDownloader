@@ -51,7 +51,7 @@ namespace Famoser.YoutubePlaylistDownloader.Presentation.UniversalWindows.Platfo
             return null;
         }
 
-        public async Task<bool> DeleteFiles(FolderType type, string folder, List<string> files)
+        public async Task<bool> DeleteFilesInFolder(FolderType type, string folder, List<string> files)
         {
             try
             {

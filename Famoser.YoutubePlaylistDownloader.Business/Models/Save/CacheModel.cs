@@ -4,6 +4,6 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Models.Save
 {
     public class CacheModel
     {
-        public List<PlaylistModel> CachedPlaylists { get; set; } 
+        public List<PlaylistCacheModel> CachedPlaylists { get; set; } 
     }
 }

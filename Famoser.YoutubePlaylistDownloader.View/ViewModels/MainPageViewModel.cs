@@ -13,14 +13,14 @@ namespace Famoser.YoutubePlaylistDownloader.View.ViewModels
     public class MainPageViewModel : ViewModelBase
     {
         private readonly IMp3Respository _mp3Respository;
-        private readonly IYoutubeRepository _youtubeRepository;
+        private readonly IPlaylistRepository _playlistRepository;
         private readonly ISmartRepository _smartRepository;
         private readonly IProgressService _progressService;
 
-        public MainPageViewModel(IMp3Respository mp3Respository, IYoutubeRepository youtubeRepository, ISmartRepository smartRepository, IProgressService progressService)
+        public MainPageViewModel(IMp3Respository mp3Respository, IPlaylistRepository playlistRepository, ISmartRepository smartRepository, IProgressService progressService)
         {
             _mp3Respository = mp3Respository;
-            _youtubeRepository = youtubeRepository;
+            _playlistRepository = playlistRepository;
             _smartRepository = smartRepository;
             _progressService = progressService;
 
@@ -48,7 +48,7 @@ namespace Famoser.YoutubePlaylistDownloader.View.ViewModels
 
         private async void Initialize()
         {
-            Playlists = await _youtubeRepository.GetPlaylists();
+            Playlists = await _playlistRepository.GetPlaylists();
         }
 
         private readonly RelayCommand _startDownload;
@@ -68,7 +68,7 @@ namespace Famoser.YoutubePlaylistDownloader.View.ViewModels
             _startDownloadActive = true;
             _startDownload.RaiseCanExecuteChanged();
 
-            await _youtubeRepository.DownloadVideos(_progressService);
+            await _playlistRepository.DownloadVideos(_progressService);
             _smartRepository.AssignMetaTags(Playlists);
             await _mp3Respository.SavePlaylists(Playlists);
             
@@ -101,7 +101,7 @@ namespace Famoser.YoutubePlaylistDownloader.View.ViewModels
 
         public async void AddToPlaylist()
         {
-            var playlist = await _youtubeRepository.GetPlaylistByLink(PlaylistLink);
+            var playlist = await _playlistRepository.AddNewPlaylistByLink(PlaylistLink);
             PlaylistLink = null;
             if (playlist != null)
             {

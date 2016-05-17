@@ -1,17 +1,11 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Linq;
 
 namespace Famoser.YoutubePlaylistDownloader.Business.Models
 {
     public class Mp3Model : BaseModel
     {
-        private string _videoTitle;
-        public string VideoTitle
-        {
-            get { return _videoTitle; }
-            set { Set(ref _videoTitle, value); }
-        }
-
         private string _title;
         public string Title
         {
@@ -73,7 +67,16 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Models
 
         public string GetRecommendedFileName()
         {
-            return Path.GetInvalidFileNameChars().Aggregate(Artist + " - " + Title + ".mp3", (current, c) => current.Replace(c.ToString(), string.Empty));
+            var fileName = Guid.NewGuid().ToString();
+            if (!string.IsNullOrEmpty(Title))
+                if (!string.IsNullOrEmpty(Artist))
+                    fileName = Artist + " - " + Title;
+                else
+                    fileName = Title;
+
+            fileName += ".mp3";
+
+            return Path.GetInvalidFileNameChars().Aggregate(fileName, (current, c) => current.Replace(c.ToString(), string.Empty));
         }
     }
 }
