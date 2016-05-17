@@ -9,6 +9,6 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Repositories.Interfaces
     {
         Task<bool> LoadFile(Mp3Model model);
         Task<bool> SaveFile(Mp3Model model);
-        Task<Mp3Model> CreateFile(VideoModel video, Stream fileStream);
+        Task<bool> CreateFile(VideoModel video, Stream fileStream);
     }
 }

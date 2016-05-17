@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Famoser.FrameworkEssentials.Logging;
+using Famoser.YoutubePlaylistDownloader.Business.Enums;
+using Famoser.YoutubePlaylistDownloader.Business.Helpers;
 using Famoser.YoutubePlaylistDownloader.Business.Models;
 using Famoser.YoutubePlaylistDownloader.Business.Repositories.Interfaces;
 using IF.Lastfm.Core.Api;
@@ -17,39 +19,23 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Repositories
             _settingsRepository = settingsRepository;
         }
 
-        public void AssignMetaTags(PlaylistModel list)
+        private void AssignMetaTags(Mp3Model model)
         {
-            foreach (var model in list.Videos)
+            model.Title = model.Title.Trim();
+            if (model.Title.Contains("-"))
             {
-                model.VideoTitle = model.VideoInfo.Name;
-                if (model.VideoTitle.Contains("-"))
-                {
-                    var split = model.VideoTitle.Split(new[] { "-" }, StringSplitOptions.RemoveEmptyEntries);
-                    model.Title = split[1].Trim();
-                    model.Artist = split[0].Trim();
-                }
-                else
-                {
-                    model.Title = model.VideoInfo.Name;
-                }
-
-                model.Comment = model.VideoInfo.Id;
-                model.Year = (uint)DateTime.Now.Year;
-                model.AlbumArtist = "famoser";
-                model.Album = "yout: " + list.Name;
-                model.Genre = list.Name;
+                var split = model.Title.Split(new[] { "-" }, StringSplitOptions.RemoveEmptyEntries);
+                model.Title = split[1].Trim();
+                model.Artist = split[0].Trim();
             }
-        }
 
-        public void AssignMetaTags(IList<PlaylistModel> list)
-        {
-            foreach (var playlistModel in list)
-            {
-                AssignMetaTags(playlistModel);
-            }
+            model.Year = (uint)DateTime.Now.Year;
+            model.AlbumArtist = "famoser";
+            model.Album = "yout: " + model.VideoModel.PlaylistModel.Name;
+            model.Genre = model.VideoModel.PlaylistModel.Name;
         }
-
-        public async Task<Uri> GetAlbumCoverUri(Mp3Model model)
+        
+        private async Task<Uri> GetAlbumCoverUri(Mp3Model model)
         {
             try
             {
@@ -87,6 +73,29 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Repositories
                 LogHelper.Instance.LogException(ex);
             }
             return null;
+        }
+
+        public async Task<bool> FillAutomaticProperties(Mp3Model model)
+        {
+            try
+            {
+                model.VideoModel.SaveStatus = SaveStatus.FillingAutomaticProperties;
+                AssignMetaTags(model);
+                var uri = await GetAlbumCoverUri(model);
+                if (uri != null)
+                {
+                    model.AlbumCover = await DownloadHelper.DownloadBytes(uri);
+                }
+
+                model.VideoModel.SaveStatus = SaveStatus.FilledAutomaticProperties;
+                return true;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.Instance.LogException(ex);
+                model.VideoModel.SaveStatus = SaveStatus.FailedFillingAutomaticProperties;
+            }
+            return false;
         }
     }
 }

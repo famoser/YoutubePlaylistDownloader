@@ -63,6 +63,7 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Repositories
         {
             try
             {
+                //todo: move file if name changed
                 var fileStream = await _folderStorageService.GetFile(Type, model.SavePath);
                 var tagFile = File.Create(new StreamFileAbstraction(model.SavePath, fileStream, fileStream));
                 
@@ -104,33 +105,39 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Repositories
             return false;
         }
 
-        public async Task<Mp3Model> CreateFile(VideoModel video, Stream fileStream)
+        public async Task<bool> CreateFile(VideoModel video, Stream fileStream)
         {
             try
             {
+                video.SaveStatus = SaveStatus.Saving;
+
                 var mp3Model = new Mp3Model()
                 {
                     Title = video.Name,
-                    VideoInfo = video
+                    VideoModel = video
                 };
 
                 var filePath = GetRecommendedFilePath(mp3Model);
                 if (await _folderStorageService.SaveFile(Type, filePath, fileStream))
                 {
                     mp3Model.SavePath = filePath;
-                    return mp3Model;
+                    mp3Model.VideoModel = video;
+                    video.Mp3Model = mp3Model;
+                    video.SaveStatus = SaveStatus.Saved;
+                    return true;
                 }
             }
             catch (Exception ex)
             {
                 LogHelper.Instance.LogException(ex);
+                video.SaveStatus = SaveStatus.FailedSaving;
             }
-            return null;
+            return false;
         }
 
         private string GetRecommendedFilePath(Mp3Model model)
         {
-            return Path.Combine(SubFolder, model.VideoInfo.PlaylistModel.Id, model.GetRecommendedFileName());
+            return Path.Combine(SubFolder, model.VideoModel.PlaylistModel.Id, model.GetRecommendedFileName());
         }
     }
 }

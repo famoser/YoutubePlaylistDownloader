@@ -57,7 +57,7 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Models
 
         public string SavePath { get; set; }
 
-        public VideoModel VideoInfo { get; set; }
+        public VideoModel VideoModel { get; set; }
 
         public bool AllImportantPropertiesFilled => !string.IsNullOrEmpty(Title) &&
                                                     !string.IsNullOrEmpty(Artist) &&

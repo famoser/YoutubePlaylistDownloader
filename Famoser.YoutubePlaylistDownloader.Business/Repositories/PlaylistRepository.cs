@@ -9,6 +9,7 @@ using Famoser.FrameworkEssentials.Services.Interfaces;
 using Famoser.YoutubeDataApiWrapper.Portable.RequestBuilders;
 using Famoser.YoutubeDataApiWrapper.Portable.RequestServices;
 using Famoser.YoutubeDataApiWrapper.Portable.Util;
+using Famoser.YoutubePlaylistDownloader.Business.Enums;
 using Famoser.YoutubePlaylistDownloader.Business.Helpers;
 using Famoser.YoutubePlaylistDownloader.Business.Helpers.Converters;
 using Famoser.YoutubePlaylistDownloader.Business.Models;
@@ -24,40 +25,57 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Repositories
     public class PlaylistRepository : IPlaylistRepository
     {
         private readonly ISettingsRepository _settingsRepository;
+        private readonly IMp3Respository _mp3Respository;
+        private readonly ISmartRepository _smartRepository;
         private readonly IPlatformService _platformService;
 
-        public PlaylistRepository(ISettingsRepository settingsRepository, IPlatformService platformService)
+        public PlaylistRepository(ISettingsRepository settingsRepository, IPlatformService platformService, IMp3Respository mp3Respository, ISmartRepository smartRepository)
         {
             _settingsRepository = settingsRepository;
             _platformService = platformService;
+            _mp3Respository = mp3Respository;
+            _smartRepository = smartRepository;
         }
 
-        private ObservableCollection<PlaylistModel> _list;
+        private ObservableCollection<PlaylistModel> _playlists;
         public async Task<ObservableCollection<PlaylistModel>> GetPlaylists()
         {
             try
             {
-                if (_list == null)
+                if (_playlists == null)
                 {
-                    _list = new ObservableCollection<PlaylistModel>();
+                    _playlists = new ObservableCollection<PlaylistModel>();
                     var cache = await _settingsRepository.GetCache();
                     if (cache != null)
                     {
                         var converter = new PlaylistConverter();
                         foreach (var playlist in cache.CachedPlaylists)
                         {
-                            _list.Add(converter.Convert(playlist));
+                            _playlists.Add(converter.Convert(playlist));
                         }
                     }
+                    BacklinkList();
                 }
-                return _list;
+                return _playlists;
             }
             catch (Exception ex)
             {
                 LogHelper.Instance.LogException(ex);
-                _list = new ObservableCollection<PlaylistModel>();
+                _playlists = new ObservableCollection<PlaylistModel>();
             }
-            return _list;
+            return _playlists;
+        }
+
+        private void BacklinkList()
+        {
+            foreach (var playlistModel in _playlists)
+            {
+                foreach (var videoModel in playlistModel.Videos)
+                {
+                    videoModel.Mp3Model.VideoModel = videoModel;
+                    videoModel.PlaylistModel = playlistModel;
+                }
+            }
         }
 
         public async Task<bool> RefreshPlaylists(IProgressService progressService)
@@ -89,10 +107,9 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Repositories
 
                     foreach (var rawPlaylist in rawPlaylists)
                     {
-                        PlaylistModel model;
-                        if (_list.All(l => l.Id != rawPlaylist.Id))
+                        if (_playlists.All(l => l.Id != rawPlaylist.Id))
                         {
-                            model = new PlaylistModel()
+                            var model = new PlaylistModel()
                             {
                                 Id = rawPlaylist.Id,
                                 Name = rawPlaylist.Snippet.Title,
@@ -114,27 +131,33 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Repositories
         {
             try
             {
-                foreach (var playlist in _list.Where(p => p.Refresh))
+                var tot = _playlists.Sum(l => l.Videos.Count(w => w.SaveStatus < SaveStatus.Finished));
+                progressService.ConfigurePercentageProgress(tot);
+                foreach (var playlist in _playlists.Where(p => p.Refresh))
                 {
                     var vids = await GetVideos(playlist);
-                    progressService.ConfigurePercentageProgress(vids.Count);
                     foreach (var videoModel in vids)
                     {
-                        if (playlist.DownloadedVideos.All(v => v.Id != videoModel.Id) &&
-                            playlist.FailedVideos.All(v => v.Id != videoModel.Id))
+                        if (videoModel.SaveStatus < SaveStatus.Finished)
                         {
-                            var mp3File = new Mp3Model
+                            videoModel.ProgressServie = new ProgressService();
+                            var stream = await DownloadHelper.DownloadYoutubeVideo(videoModel, videoModel.ProgressServie);
+                            if (stream != null &&
+                                await _mp3Respository.CreateFile(videoModel, stream) &&
+                                await _smartRepository.FillAutomaticProperties(videoModel.Mp3Model))
                             {
-                                DownloadStream =
-                                    await DownloadHelper.DownloadYoutubeVideo(videoModel, new ProgressService())
-                            };
+                                videoModel.SaveStatus = SaveStatus.Finished;
 
-                            playlist.Videos.Add(mp3File);
+                                await _mp3Respository.SaveFile(videoModel.Mp3Model);
+                            }
                         }
 
                         progressService.IncrementPercentageProgress();
                     }
                 }
+
+                //todo: save cache
+                progressService.HidePercentageProgress();
                 return true;
             }
             catch (Exception ex)
@@ -146,15 +169,15 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Repositories
 
         private void InsertInOrder(PlaylistModel model)
         {
-            for (int i = 0; i < _list.Count; i++)
+            for (int i = 0; i < _playlists.Count; i++)
             {
-                if (string.Compare(_list[i].Name, model.Name, StringComparison.Ordinal) > 0)
+                if (string.Compare(_playlists[i].Name, model.Name, StringComparison.Ordinal) > 0)
                 {
-                    _list.Insert(i, model);
+                    _playlists.Insert(i, model);
                     return;
                 }
             }
-            _list.Add(model);
+            _playlists.Add(model);
         }
 
         private async Task<YouTubeService> GetService()

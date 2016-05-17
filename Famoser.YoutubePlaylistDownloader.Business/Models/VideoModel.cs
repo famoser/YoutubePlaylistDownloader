@@ -1,4 +1,6 @@
-﻿using Famoser.YoutubePlaylistDownloader.Business.Enums;
+﻿using Famoser.FrameworkEssentials.Services;
+using Famoser.FrameworkEssentials.Services.Interfaces;
+using Famoser.YoutubePlaylistDownloader.Business.Enums;
 
 namespace Famoser.YoutubePlaylistDownloader.Business.Models
 {
@@ -18,6 +20,13 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Models
         {
             get { return _saveStatus; }
             set { Set(ref _saveStatus, value); }
+        }
+
+        private ProgressService _progressServie;
+        public ProgressService ProgressServie
+        {
+            get { return _progressServie; }
+            set { Set(ref _progressServie, value); }
         }
 
         public PlaylistModel PlaylistModel { get; set; }

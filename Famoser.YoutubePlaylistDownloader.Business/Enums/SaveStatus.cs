@@ -5,12 +5,20 @@
         Discovered = 0,
         DownloadPending = 10,
         Downloading = 11,
-        Converting = 12,
-        Saving = 13,
+        Downloaded = 12,
+        Converting = 13,
+        Converted = 14,
+        FillingAutomaticProperties = 15,
+        FilledAutomaticProperties = 16,
+        Saving = 17,
+        Saved = 18,
         Finished = 20,
 
-        FailedDownloading = 111,
-        FailedConverting = 112,
-        FailedSaving = 113
+        FailedDownloadingResolvingUrl = 1111,
+        FailedDownloading = 1110,
+        FailedConverting = 1120,
+        FailedDownloadOrConversion = 1666,
+        FailedFillingAutomaticProperties = 1150,
+        FailedSaving = 1130
     }
 }

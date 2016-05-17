@@ -16,7 +16,7 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Helpers
         {
             return new Mp3FileMetaData()
             {
-                Id = model.VideoInfo.Id,
+                Id = model.VideoModel.Id,
                 V = ProgrammVersion
             };
         }
