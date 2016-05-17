@@ -5,14 +5,13 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using Famoser.FrameworkEssentials.Logging;
 using Famoser.FrameworkEssentials.Services.Interfaces;
-using Famoser.FrameworkEssentials.Singleton;
 using Famoser.YoutubeExtractor.Portable.Downloaders;
 using Famoser.YoutubeExtractor.Portable.Helpers;
 using Famoser.YoutubeExtractor.Portable.Models;
 using Famoser.YoutubePlaylistDownloader.Business.Models;
 using TagLib;
 
-namespace Famoser.YoutubePlaylistDownloader.Business.Services
+namespace Famoser.YoutubePlaylistDownloader.Business.Helpers
 {
     public class DownloadHelper
     {

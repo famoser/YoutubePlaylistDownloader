@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Famoser.FrameworkEssentials.Services.Interfaces;
-using Famoser.YoutubePlaylistDownloader.Business.Services.Interfaces;
+﻿using Famoser.YoutubePlaylistDownloader.Business.Services.Interfaces;
 using Famoser.YoutubePlaylistDownloader.Presentation.UniversalWindows.Platform;
 using Famoser.YoutubePlaylistDownloader.View.ViewModels;
 using GalaSoft.MvvmLight.Ioc;

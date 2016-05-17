@@ -1,14 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Famoser.YoutubePlaylistDownloader.Business.Enums;
 
 namespace Famoser.YoutubePlaylistDownloader.Business.Models.Save
 {
-    public class VideoCacheModel
+    public class VideoCacheModel : YoutubeCacheModel
     {
-        public string Id { get; set; }
-        public string FileName { get; set; }
+        public Mp3CacheModel Mp3Model;
+        public SaveStatus SaveStatus;
     }
 }

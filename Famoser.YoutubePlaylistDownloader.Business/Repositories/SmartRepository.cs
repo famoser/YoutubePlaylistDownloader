@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Famoser.FrameworkEssentials.Logging;
 using Famoser.YoutubePlaylistDownloader.Business.Models;
@@ -21,12 +19,12 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Repositories
 
         public void AssignMetaTags(PlaylistModel list)
         {
-            foreach (var model in list.NewFiles)
+            foreach (var model in list.Videos)
             {
-                model.OriginalTitle = model.VideoInfo.Name;
-                if (model.OriginalTitle.Contains("-"))
+                model.VideoTitle = model.VideoInfo.Name;
+                if (model.VideoTitle.Contains("-"))
                 {
-                    var split = model.OriginalTitle.Split(new[] { "-" }, StringSplitOptions.RemoveEmptyEntries);
+                    var split = model.VideoTitle.Split(new[] { "-" }, StringSplitOptions.RemoveEmptyEntries);
                     model.Title = split[1].Trim();
                     model.Artist = split[0].Trim();
                 }

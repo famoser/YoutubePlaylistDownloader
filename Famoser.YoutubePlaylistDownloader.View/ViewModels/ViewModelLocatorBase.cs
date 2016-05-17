@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Famoser.FrameworkEssentials.Services;
+﻿using Famoser.FrameworkEssentials.Services;
 using Famoser.FrameworkEssentials.Services.Interfaces;
 using Famoser.YoutubePlaylistDownloader.Business.Repositories;
 using Famoser.YoutubePlaylistDownloader.Business.Repositories.Interfaces;

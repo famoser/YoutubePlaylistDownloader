@@ -1,14 +1,25 @@
-﻿namespace Famoser.YoutubePlaylistDownloader.Business.Models
-{
-    public class VideoModel : BaseModel
-    {
-        public string Id { get; set; }
-        public string Name { get; set; }
-        public string FileName { get; set; }
+﻿using Famoser.YoutubePlaylistDownloader.Business.Enums;
 
-        public string Link
+namespace Famoser.YoutubePlaylistDownloader.Business.Models
+{
+    public class VideoModel : YoutubeModel
+    {
+        public override string Link => "https://www.youtube.com/watch?v=" + Id;
+
+        private Mp3Model _mp3Model;
+        public Mp3Model Mp3Model
         {
-            get { return "https://www.youtube.com/watch?v=" + Id; }
+            get { return _mp3Model; }
+            set { Set(ref _mp3Model, value); }
         }
+
+        private SaveStatus _saveStatus;
+        public SaveStatus SaveStatus
+        {
+            get { return _saveStatus; }
+            set { Set(ref _saveStatus, value); }
+        }
+
+        public PlaylistModel PlaylistModel { get; set; }
     }
 }

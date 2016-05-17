@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using Famoser.FrameworkEssentials.Logging;
 using Famoser.FrameworkEssentials.Services;
@@ -15,7 +12,6 @@ using Famoser.YoutubeDataApiWrapper.Portable.Util;
 using Famoser.YoutubePlaylistDownloader.Business.Helpers;
 using Famoser.YoutubePlaylistDownloader.Business.Models;
 using Famoser.YoutubePlaylistDownloader.Business.Repositories.Interfaces;
-using Famoser.YoutubePlaylistDownloader.Business.Services;
 using Famoser.YoutubePlaylistDownloader.Business.Services.Interfaces;
 using Google.Apis.Auth.OAuth2;
 using Google.Apis.Services;
@@ -75,7 +71,7 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Repositories
                     {
                         model.DownloadedVideos = ConverterHelper.Convert(oldOne.DownloadedVideos);
                         model.FailedVideos = ConverterHelper.Convert(oldOne.FailedVideos);
-                        model.Download = oldOne.Download;
+                        model.Refresh = oldOne.Download;
                     }
 
                     model.TotalVideos = rawPlaylist.ContentDetails.ItemCount.HasValue
@@ -91,7 +87,7 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Repositories
 
         public async Task<bool> DownloadVideos(IProgressService progressService)
         {
-            foreach (var playlist in _list.Where(p => p.Download))
+            foreach (var playlist in _list.Where(p => p.Refresh))
             {
                 var vids = await GetVideos(playlist);
                 progressService.ConfigurePercentageProgress(vids.Count);
@@ -106,7 +102,7 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Repositories
                                 await DownloadHelper.DownloadYoutubeVideo(videoModel, new ProgressService())
                         };
 
-                        playlist.NewFiles.Add(mp3File);
+                        playlist.Videos.Add(mp3File);
                     }
 
                     progressService.IncrementPercentageProgress();

@@ -1,12 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Famoser.FrameworkEssentials.Logging;
-using Famoser.FrameworkEssentials.Services.Interfaces;
 using Famoser.YoutubePlaylistDownloader.Business.Enums;
-using Famoser.YoutubePlaylistDownloader.Business.Models;
 using Famoser.YoutubePlaylistDownloader.Business.Models.Save;
 using Famoser.YoutubePlaylistDownloader.Business.Repositories.Interfaces;
 using Famoser.YoutubePlaylistDownloader.Business.Services.Interfaces;

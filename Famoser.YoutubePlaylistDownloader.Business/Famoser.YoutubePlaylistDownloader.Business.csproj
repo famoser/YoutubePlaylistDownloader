@@ -38,16 +38,24 @@
   <ItemGroup>
     <Compile Include="Enums\FileKeys.cs" />
     <Compile Include="Enums\FolderType.cs" />
-    <Compile Include="Helpers\ConverterHelper.cs" />
+    <Compile Include="Enums\SaveStatus.cs" />
+    <Compile Include="Helpers\Converters\BaseConverter.cs" />
+    <Compile Include="Helpers\Converters\Mp3Converter.cs" />
+    <Compile Include="Helpers\Converters\PlaylistConverter.cs" />
+    <Compile Include="Helpers\Converters\VideoConverter.cs" />
+    <Compile Include="Helpers\Converters\YoutubeConverter.cs" />
     <Compile Include="Helpers\StreamHelper.cs" />
     <Compile Include="Models\BaseModel.cs" />
     <Compile Include="Models\Save\ConfigurationModel.cs" />
     <Compile Include="Models\Mp3Model.cs" />
     <Compile Include="Models\PlaylistModel.cs" />
     <Compile Include="Models\Save\CacheModel.cs" />
+    <Compile Include="Models\Save\Mp3CacheModel.cs" />
     <Compile Include="Models\Save\PlaylistCacheModel.cs" />
     <Compile Include="Models\Save\VideoCacheModel.cs" />
+    <Compile Include="Models\Save\YoutubeCacheModel.cs" />
     <Compile Include="Models\VideoModel.cs" />
+    <Compile Include="Models\YoutubeModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Repositories\Interfaces\ISmartRepository.cs" />
     <Compile Include="Repositories\Interfaces\IYoutubeRepository.cs" />

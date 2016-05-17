@@ -1,13 +1,10 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Threading.Tasks;
 using System.Windows.Input;
 using Famoser.FrameworkEssentials.Services.Interfaces;
 using Famoser.YoutubePlaylistDownloader.Business.Models;
-using Famoser.YoutubePlaylistDownloader.Business.Models.Save;
 using Famoser.YoutubePlaylistDownloader.Business.Repositories.Interfaces;
-using Famoser.YoutubePlaylistDownloader.Business.Services;
 using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Command;
 
@@ -37,9 +34,8 @@ namespace Famoser.YoutubePlaylistDownloader.View.ViewModels
                 {
                     var model = new PlaylistModel()
                     {
-                        Download = Convert.ToBoolean(i % 2),
+                        Refresh = Convert.ToBoolean(i % 2),
                         Name = "name " + i,
-                        TotalVideos = 15 + i
                     };
                     Playlists.Add(model);
                 }

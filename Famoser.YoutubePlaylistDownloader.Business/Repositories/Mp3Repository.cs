@@ -11,9 +11,9 @@ using Famoser.YoutubePlaylistDownloader.Business.Helpers;
 using Famoser.YoutubePlaylistDownloader.Business.Models;
 using Famoser.YoutubePlaylistDownloader.Business.Models.Save;
 using Famoser.YoutubePlaylistDownloader.Business.Repositories.Interfaces;
-using Famoser.YoutubePlaylistDownloader.Business.Services;
 using Famoser.YoutubePlaylistDownloader.Business.Services.Interfaces;
 using TagLib;
+using TagLib.Id3v2;
 
 namespace Famoser.YoutubePlaylistDownloader.Business.Repositories
 {
@@ -46,7 +46,9 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Repositories
                 var tagFile = File.Create(new StreamFileAbstraction(file,
                     fileStream, fileStream));
 
-                var tags = tagFile.GetTag(TagTypes.Id3v2);
+                var tags = (TagLib.Id3v2.Tag)tagFile.GetTag(TagTypes.Id3v2);
+                PrivateFrame p = PrivateFrame.Get(tags, "CustomKey", true);
+                p.PrivateData = Encoding.Unicode.GetBytes("Sample Value");
                 var model = new Mp3Model()
                 {
                     Album = tags.Album,
@@ -56,7 +58,7 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Repositories
                     Genre = tags.Genres.FirstOrDefault(),
                     Title = tags.Title,
                     Year = tags.Year,
-                    File = tagFile
+                    Mp3File = tagFile
                 };
                 res.Add(model);
             }
@@ -69,13 +71,13 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Repositories
             {
                 foreach (var playlist in playlists)
                 {
-                    foreach (var mp3Model in playlist.NewFiles)
+                    foreach (var mp3Model in playlist.Videos)
                     {
-                        if (mp3Model.File == null)
+                        if (mp3Model.Mp3File == null)
                         {
                             var fileStream = await _folderStorageService.GetFile(_type, playlist.Id, mp3Model.GetRecommendedFileName());
                             var tagFile = File.Create(new StreamFileAbstraction(mp3Model.GetRecommendedFileName(), fileStream, fileStream));
-                            mp3Model.File = tagFile;
+                            mp3Model.Mp3File = tagFile;
                         }
 
                         //to avoid null reference exception
@@ -86,26 +88,26 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Repositories
                         if (mp3Model.Artist == null)
                             mp3Model.Artist = "";
 
-                        mp3Model.File.Tag.Album = mp3Model.Album;
-                        mp3Model.File.Tag.AlbumArtists = new[] { mp3Model.AlbumArtist };
-                        mp3Model.File.Tag.Performers = new[] { mp3Model.Artist };
-                        mp3Model.File.Tag.Title = mp3Model.Title;
-                        mp3Model.File.Tag.Comment = mp3Model.Comment;
-                        mp3Model.File.Tag.Genres = new[] { mp3Model.Genre };
-                        mp3Model.File.Tag.Year = mp3Model.Year;
+                        mp3Model.Mp3File.Tag.Album = mp3Model.Album;
+                        mp3Model.Mp3File.Tag.AlbumArtists = new[] { mp3Model.AlbumArtist };
+                        mp3Model.Mp3File.Tag.Performers = new[] { mp3Model.Artist };
+                        mp3Model.Mp3File.Tag.Title = mp3Model.Title;
+                        mp3Model.Mp3File.Tag.Comment = mp3Model.Comment;
+                        mp3Model.Mp3File.Tag.Genres = new[] { mp3Model.Genre };
+                        mp3Model.Mp3File.Tag.Year = mp3Model.Year;
                         if (mp3Model.AlbumCover != null)
                         {
                             var picture = await DownloadHelper.GetAlbumArt(mp3Model.AlbumCover);
                             if (picture != null)
                             {
-                                mp3Model.File.Tag.Pictures = new IPicture[1] { picture };
+                                mp3Model.Mp3File.Tag.Pictures = new IPicture[1] { picture };
                             }
                         }
-                        mp3Model.File.Save();
+                        mp3Model.Mp3File.Save();
                     }
 
-                    playlist.DownloadedVideos.AddRange(playlist.NewFiles.Select(e => e.VideoInfo));
-                    playlist.NewFiles.Clear();
+                    playlist.DownloadedVideos.AddRange(playlist.Videos.Select(e => e.VideoInfo));
+                    playlist.Videos.Clear();
                 }
 
                 var cacheModel = new CacheModel()

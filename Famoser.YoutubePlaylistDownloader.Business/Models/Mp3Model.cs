@@ -1,18 +1,15 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using System.Linq;
-using Famoser.YoutubeExtractor.Portable.Models;
-using TagLib;
 
 namespace Famoser.YoutubePlaylistDownloader.Business.Models
 {
     public class Mp3Model : BaseModel
     {
-        private string _originalTitle;
-        public string OriginalTitle
+        private string _videoTitle;
+        public string VideoTitle
         {
-            get { return _originalTitle; }
-            set { Set(ref _originalTitle, value); }
+            get { return _videoTitle; }
+            set { Set(ref _videoTitle, value); }
         }
 
         private string _title;
@@ -57,22 +54,15 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Models
             set { Set(ref _year, value); }
         }
 
-        private string _comment;
-        public string Comment
-        {
-            get { return _comment; }
-            set { Set(ref _comment, value); }
-        }
-
-        private Uri _albumCover;
-        public Uri AlbumCover
+        private byte[] _albumCover;
+        public byte[] AlbumCover
         {
             get { return _albumCover; }
             set { Set(ref _albumCover, value); }
         }
 
-        public File File { get; set; }
-        public Stream DownloadStream { get; set; }
+        public string SavePath { get; set; }
+
         public VideoModel VideoInfo { get; set; }
 
         public bool AllImportantPropertiesFilled => !string.IsNullOrEmpty(Title) &&
