@@ -13,6 +13,7 @@ using Famoser.YoutubePlaylistDownloader.Business.Enums;
 using Famoser.YoutubePlaylistDownloader.Business.Helpers;
 using Famoser.YoutubePlaylistDownloader.Business.Helpers.Converters;
 using Famoser.YoutubePlaylistDownloader.Business.Models;
+using Famoser.YoutubePlaylistDownloader.Business.Models.Data;
 using Famoser.YoutubePlaylistDownloader.Business.Repositories.Interfaces;
 using Famoser.YoutubePlaylistDownloader.Business.Services.Interfaces;
 using Google.Apis.Auth.OAuth2;
@@ -443,9 +444,23 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Repositories
                 Genre = "Genre des Dinos",
                 Title = "Grösser Titer",
                 Year = 2014,
-                FilePath = "8213ää123ö12ü713äa/Artist - Song.mp3"
+                FilePath = "8213ää123ö12ü713äa/Artist - Song.mp3",
+                FileInfo = GetInfoExampleModel()
             };
             return mp3;
+        }
+
+        private Mp3FileInfo GetInfoExampleModel()
+        {
+            return new Mp3FileInfo()
+            {
+                SaveDate = DateTime.Now,
+                CreatedProgramVersion = 1,
+                CreateDate = DateTime.Now,
+                SaveProgramVersion = 2,
+                AudioBitrate = 200,
+                Duration = TimeSpan.FromSeconds(200)
+            };
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using Famoser.YoutubePlaylistDownloader.Business.Models;
+﻿using System;
+using Famoser.YoutubePlaylistDownloader.Business.Models;
 using Famoser.YoutubePlaylistDownloader.Business.Models.Data;
 
 namespace Famoser.YoutubePlaylistDownloader.Business.Helpers
@@ -9,10 +10,22 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Helpers
 
         public static Mp3FileMetaData GetMp3FileMetaData(Mp3Model model)
         {
+            if (model.FileInfo != null)
+                return new Mp3FileMetaData()
+                {
+                    CreateDate = model.FileInfo.CreateDate,
+                    CreatedProgramVersion = model.FileInfo.CreatedProgramVersion,
+                    SaveDate = DateTime.Now,
+                    SaveProgramVersion = ProgrammVersion,
+                    Id = model.VideoModel.Id
+                };
             return new Mp3FileMetaData()
             {
-                Id = model.VideoModel.Id,
-                V = ProgrammVersion
+                CreateDate = DateTime.Now,
+                CreatedProgramVersion = ProgrammVersion,
+                SaveDate = DateTime.Now,
+                SaveProgramVersion = ProgrammVersion,
+                Id = model.VideoModel.Id
             };
         }
     }

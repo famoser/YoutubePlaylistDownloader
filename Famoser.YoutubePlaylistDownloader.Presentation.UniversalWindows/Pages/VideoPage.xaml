@@ -11,6 +11,8 @@
 
     <Page.Resources>
         <converters:ByteToBitmapConverter x:Key="ByteToBitmapConverter" />
+        <converters:DateTimeConverter x:Key="DateTimeConverter" />
+        <converters:TimeSpanConverter x:Key="TimeSpanConverter" />
     </Page.Resources>
     
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
@@ -29,18 +31,45 @@
             <Grid Grid.Row="0" MaxHeight="300" Visibility="{Binding SelectedVideo.Mp3Model.AlbumCover, Mode=OneWay, Converter={StaticResource ReferenceToVisibilityConverter}}" >
                 <Image Stretch="UniformToFill" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0" Source="{Binding SelectedVideo.Mp3Model.AlbumCover, Converter={StaticResource ByteToBitmapConverter}}" />
             </Grid>
-            <StackPanel Grid.Row="1">
-                <TextBlock Text="Title" Style="{StaticResource FlatTextBoxDescription}" />
-                <TextBox Text="{Binding SelectedVideo.Mp3Model.Title}" Style="{ThemeResource FlatTextBox}" />
-                <TextBlock Text="Artist (divide multiple by comma)" Style="{StaticResource FlatTextBoxDescription}" />
-                <TextBox Text="{Binding SelectedVideo.Mp3Model.Artist}" Style="{ThemeResource FlatTextBox}" />
-                <TextBlock Text="Album" Style="{StaticResource FlatTextBoxDescription}" />
-                <TextBox Text="{Binding SelectedVideo.Mp3Model.Album}" Style="{ThemeResource FlatTextBox}" />
-                <TextBlock Text="Album Artist (divide multiple by comma)" Style="{StaticResource FlatTextBoxDescription}" />
-                <TextBox Text="{Binding SelectedVideo.Mp3Model.AlbumArtist}" Style="{ThemeResource FlatTextBox}" />
-                <TextBlock Text="Genre (divide multiple by comma)" Style="{StaticResource FlatTextBoxDescription}" />
-                <TextBox Text="{Binding SelectedVideo.Mp3Model.Genre}" Style="{ThemeResource FlatTextBox}" />
-            </StackPanel>
+            <ScrollViewer Grid.Row="1">
+                <StackPanel>
+                    <TextBlock Text="Title" Style="{StaticResource FlatTextBoxDescription}" />
+                    <TextBox Text="{Binding SelectedVideo.Mp3Model.Title, Mode=TwoWay}" Style="{ThemeResource FlatTextBox}" />
+                    <TextBlock Text="Artist (divide multiple by comma)" Style="{StaticResource FlatTextBoxDescription}" />
+                    <TextBox Text="{Binding SelectedVideo.Mp3Model.Artist, Mode=TwoWay}" Style="{ThemeResource FlatTextBox}" />
+                    <TextBlock Text="Album" Style="{StaticResource FlatTextBoxDescription}" />
+                    <TextBox Text="{Binding SelectedVideo.Mp3Model.Album, Mode=TwoWay}" Style="{ThemeResource FlatTextBox}" />
+                    <TextBlock Text="Album Artist (divide multiple by comma)" Style="{StaticResource FlatTextBoxDescription}" />
+                    <TextBox Text="{Binding SelectedVideo.Mp3Model.AlbumArtist, Mode=TwoWay}" Style="{ThemeResource FlatTextBox}" />
+                    <TextBlock Text="Genre (divide multiple by comma)" Style="{StaticResource FlatTextBoxDescription}" />
+                    <TextBox Text="{Binding SelectedVideo.Mp3Model.Genre, Mode=TwoWay}" Style="{ThemeResource FlatTextBox}" />
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="Duration" Style="{StaticResource FlatTextBoxDescription}" />
+                            <TextBlock Text="{Binding SelectedVideo.Mp3Model.FileInfo.Duration, Converter={StaticResource TimeSpanConverter}}" Style="{StaticResource SecondaryTexBlock}" />
+                            <TextBlock Text="Created at" Style="{StaticResource FlatTextBoxDescription}" />
+                            <TextBlock Text="{Binding SelectedVideo.Mp3Model.FileInfo.CreateDate, Converter={StaticResource DateTimeConverter}}" Style="{StaticResource SecondaryTexBlock}" />
+                            <TextBlock Text="Saved at" Style="{StaticResource FlatTextBoxDescription}" />
+                            <TextBlock Text="{Binding SelectedVideo.Mp3Model.FileInfo.SaveDate, Converter={StaticResource DateTimeConverter}}" Style="{StaticResource SecondaryTexBlock}" />
+                        </StackPanel>
+                        <StackPanel Grid.Column="1">
+                            <TextBlock Text="Duration" Style="{StaticResource FlatTextBoxDescription}" />
+                            <TextBlock Text="{Binding SelectedVideo.Mp3Model.FileInfo.AudioBitrate}" Style="{StaticResource SecondaryTexBlock}" />
+                            <TextBlock Text="Created program version" Style="{StaticResource FlatTextBoxDescription}" />
+                            <TextBlock Text="{Binding SelectedVideo.Mp3Model.FileInfo.CreatedProgramVersion}" Style="{StaticResource SecondaryTexBlock}" />
+                            <TextBlock Text="Saved program version" Style="{StaticResource FlatTextBoxDescription}" />
+                            <TextBlock Text="{Binding SelectedVideo.Mp3Model.FileInfo.SaveProgramVersion}" Style="{StaticResource SecondaryTexBlock}" />
+                        </StackPanel>
+                    </Grid>
+                    
+                    
+                </StackPanel>
+
+            </ScrollViewer>
         </Grid>
     </Grid>
 

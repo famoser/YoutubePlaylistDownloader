@@ -1,11 +1,13 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using Famoser.YoutubePlaylistDownloader.Business.Models.Data;
 
 namespace Famoser.YoutubePlaylistDownloader.Business.Models
 {
     public class Mp3Model : BaseModel
     {
+        #region editable fields
         private string _title;
         public string Title
         {
@@ -47,6 +49,7 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Models
             get { return _year; }
             set { Set(ref _year, value); }
         }
+        #endregion
 
         private byte[] _albumCover;
         public byte[] AlbumCover
@@ -55,15 +58,16 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Models
             set { Set(ref _albumCover, value); }
         }
 
+        private Mp3FileInfo _fileInfo;
+        public Mp3FileInfo FileInfo
+        {
+            get { return _fileInfo; }
+            set { Set(ref _fileInfo, value); }
+        }
+
         public string FilePath { get; set; }
 
         public VideoModel VideoModel { get; set; }
-
-        public bool AllImportantPropertiesFilled => !string.IsNullOrEmpty(Title) &&
-                                                    !string.IsNullOrEmpty(Artist) &&
-                                                    !string.IsNullOrEmpty(Album) &&
-                                                    !string.IsNullOrEmpty(AlbumArtist) &&
-                                                    !string.IsNullOrEmpty(Genre);
 
         public string GetRecommendedFileName()
         {

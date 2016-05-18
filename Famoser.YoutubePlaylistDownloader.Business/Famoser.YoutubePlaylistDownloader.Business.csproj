@@ -49,6 +49,7 @@
     <Compile Include="Helpers\Mp3Helper.cs" />
     <Compile Include="Helpers\StreamHelper.cs" />
     <Compile Include="Models\BaseModel.cs" />
+    <Compile Include="Models\Data\Mp3FileInfo.cs" />
     <Compile Include="Models\Data\Mp3FileMetaData.cs" />
     <Compile Include="Models\ProgressAwareModel.cs" />
     <Compile Include="Models\Save\ConfigurationModel.cs" />

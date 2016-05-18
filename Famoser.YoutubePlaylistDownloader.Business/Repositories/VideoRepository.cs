@@ -7,6 +7,7 @@ using Famoser.FrameworkEssentials.Logging;
 using Famoser.YoutubePlaylistDownloader.Business.Enums;
 using Famoser.YoutubePlaylistDownloader.Business.Helpers;
 using Famoser.YoutubePlaylistDownloader.Business.Models;
+using Famoser.YoutubePlaylistDownloader.Business.Models.Data;
 using Famoser.YoutubePlaylistDownloader.Business.Repositories.Interfaces;
 using Famoser.YoutubePlaylistDownloader.Business.Services.Interfaces;
 using Newtonsoft.Json;
@@ -43,16 +44,35 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Repositories
                 model.AlbumArtist = string.Join(", ", tagFile.Tag.AlbumArtists);
                 model.Genre = string.Join(", ", tagFile.Tag.Genres);
                 model.Year = tagFile.Tag.Year;
-                //todo
-                //tagFile.Tag.Disc = 1;
-                //tagFile.Tag.DiscCount = 1;
-                //tagFile.Tag.Track
-
-                if (tagFile.Tag.Pictures != null)
+                model.FileInfo = new Mp3FileInfo
                 {
-                    var pic = tagFile.Tag.Pictures.FirstOrDefault();
-                    model.AlbumCover = pic.Data.Data;
+                    Duration = tagFile.Properties.Duration,
+                    AudioBitrate = tagFile.Properties.AudioBitrate
+                };
+
+                // save meta data
+                var id3Tag = tagFile.GetTag(TagTypes.Id3v2);
+                if (id3Tag is TagLib.Id3v2.Tag)
+                {
+                    try
+                    {
+                        PrivateFrame mp3Json = PrivateFrame.Get(id3Tag as TagLib.Id3v2.Tag, "ypdjson", false);
+                        var json = Encoding.Unicode.GetString(mp3Json.PrivateData.Data, 0, mp3Json.PrivateData.Data.Length);
+                        var metaData = JsonConvert.DeserializeObject<Mp3FileMetaData>(json);
+                        model.FileInfo.SaveDate = metaData.SaveDate;
+                        model.FileInfo.SaveProgramVersion = metaData.SaveProgramVersion;
+                        model.FileInfo.CreatedProgramVersion = metaData.CreatedProgramVersion;
+                        model.FileInfo.CreateDate = metaData.CreateDate;
+                    }
+                    catch (Exception ex)
+                    {
+                        LogHelper.Instance.LogException(ex);
+                    }
                 }
+
+                var pic = tagFile.Tag.Pictures?.FirstOrDefault();
+                if (pic != null)
+                    model.AlbumCover = pic.Data.Data;
 
                 return true;
             }
@@ -61,7 +81,6 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Repositories
                 LogHelper.Instance.LogException(ex);
             }
             return false;
-
         }
 
         public async Task<bool> SaveToMusicLibrary(VideoModel videoModel)
@@ -69,7 +88,6 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Repositories
             try
             {
                 var model = videoModel.Mp3Model;
-                //todo: move file if name changed
                 var file = await _folderStorageService.GetTagLibFile(Type, model.FilePath);
                 var tagFile = File.Create(file);
 
@@ -80,6 +98,11 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Repositories
                 tagFile.Tag.Performers = model.Artist.Split(new[] { ", " }, StringSplitOptions.RemoveEmptyEntries);
                 tagFile.Tag.Genres = model.Genre.Split(new[] { ", " }, StringSplitOptions.RemoveEmptyEntries);
                 tagFile.Tag.Year = model.Year;
+
+                //todo
+                //tagFile.Tag.Disc = 1;
+                //tagFile.Tag.DiscCount = 1;
+                //tagFile.Tag.Track
 
                 //save image
                 if (model.AlbumCover != null && model.AlbumCover.Length > 0)

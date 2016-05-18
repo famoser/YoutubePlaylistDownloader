@@ -1,9 +1,15 @@
 ﻿using System;
 using Windows.ApplicationModel;
 using Windows.ApplicationModel.Activation;
+using Windows.Foundation.Metadata;
+using Windows.UI.Core;
+using Windows.UI.ViewManagement;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Navigation;
+using GalaSoft.MvvmLight.Ioc;
+using GalaSoft.MvvmLight.Threading;
+using GalaSoft.MvvmLight.Views;
 
 namespace Famoser.YoutubePlaylistDownloader.Presentation.UniversalWindows
 {
@@ -67,8 +73,40 @@ namespace Famoser.YoutubePlaylistDownloader.Presentation.UniversalWindows
                     // parameter
                     rootFrame.Navigate(typeof(MainPage), e.Arguments);
                 }
-                // Ensure the current window is active
+                
+                SystemNavigationManager.GetForCurrentView().BackRequested += (s, ev) =>
+                {
+                    if (!ev.Handled)
+                    {
+                        Frame frame = Window.Current.Content as Frame;
+
+                        if (frame != null && frame.CanGoBack)
+                        {
+                            var ns = SimpleIoc.Default.GetInstance<INavigationService>();
+                            ns.GoBack();
+                            ev.Handled = true;
+                        }
+                        else
+                        {
+                            Current.Exit();
+                        }
+                    }
+                };
+
+                InitView();
+
+                DispatcherHelper.Initialize();
+
                 Window.Current.Activate();
+            }
+        }
+
+        private async void InitView()
+        {
+            if (ApiInformation.IsTypePresent("Windows.UI.ViewManagement.StatusBar"))
+            {
+                var statusBar = StatusBar.GetForCurrentView();
+                await statusBar.HideAsync();
             }
         }
 

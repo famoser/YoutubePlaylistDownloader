@@ -52,34 +52,35 @@ namespace Famoser.YoutubePlaylistDownloader.View.ViewModels
         private readonly RelayCommand _refreshPlaylists;
         public ICommand RefreshPlaylistsCommand => _refreshPlaylists;
 
-        private bool CanExecuteRefreshPlaylistsCommand => !_refreshPlaylistsActive;
-
-        private bool _refreshPlaylistsActive;
+        private bool CanExecuteRefreshPlaylistsCommand => !_prozessActive;
+        
         public async void RefreshPlaylist()
         {
-            _refreshPlaylistsActive = true;
+            _prozessActive = true;
             _refreshPlaylists.RaiseCanExecuteChanged();
+            _startDownload.RaiseCanExecuteChanged();
 
             await _playlistRepository.RefreshAllPlaylists(_progressService);
 
-            _refreshPlaylistsActive = false;
+            _prozessActive = false;
             _refreshPlaylists.RaiseCanExecuteChanged();
+            _startDownload.RaiseCanExecuteChanged();
         }
 
         private readonly RelayCommand _startDownload;
         public ICommand StartDownloadCommand => _startDownload;
 
-        private bool CanExecuteStartDownloadCommand => Playlists != null && Playlists.Any() && !_startDownloadActive;
+        private bool CanExecuteStartDownloadCommand => Playlists != null && Playlists.Any() && !_prozessActive;
 
-        private bool _startDownloadActive;
+        private bool _prozessActive;
         public async void StartDownload()
         {
-            _startDownloadActive = true;
+            _prozessActive = true;
             _startDownload.RaiseCanExecuteChanged();
 
             await _playlistRepository.DownloadVideosForAllPlaylists(_progressService);
 
-            _startDownloadActive = false;
+            _prozessActive = false;
             _startDownload.RaiseCanExecuteChanged();
         }
 
