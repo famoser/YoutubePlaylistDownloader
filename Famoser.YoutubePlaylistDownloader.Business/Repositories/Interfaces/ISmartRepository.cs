@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Famoser.YoutubePlaylistDownloader.Business.Models;
 
 namespace Famoser.YoutubePlaylistDownloader.Business.Repositories.Interfaces

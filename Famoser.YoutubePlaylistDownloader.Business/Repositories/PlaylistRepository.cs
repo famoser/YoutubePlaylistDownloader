@@ -13,7 +13,6 @@ using Famoser.YoutubePlaylistDownloader.Business.Enums;
 using Famoser.YoutubePlaylistDownloader.Business.Helpers;
 using Famoser.YoutubePlaylistDownloader.Business.Helpers.Converters;
 using Famoser.YoutubePlaylistDownloader.Business.Models;
-using Famoser.YoutubePlaylistDownloader.Business.Models.Save;
 using Famoser.YoutubePlaylistDownloader.Business.Repositories.Interfaces;
 using Famoser.YoutubePlaylistDownloader.Business.Services.Interfaces;
 using Google.Apis.Auth.OAuth2;
@@ -67,15 +66,15 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Repositories
             return _playlists;
         }
 
-        public async Task<bool> RefreshPlaylist(PlaylistModel playlist, IProgressService progressService)
+        private async Task<bool> RefreshPlaylistWorker(PlaylistModel playlist, IProgressService progressService)
         {
             try
             {
+                progressService.StartIndeterminateProgress(IndeterminateProgressKeys.RefreshPlaylist);
                 var youtubeService = await GetService();
 
                 if (youtubeService != null)
                 {
-                    //Get 5000 videos from a uploads playlist
                     var plistItemsListRequestBuilder = new PlaylistItemsListRequestBuilder(youtubeService, "snippet, contentDetails")
                     {
                         PlaylistId = playlist.Id
@@ -111,9 +110,27 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Repositories
                         else
                             playlist.Videos.Add(video);
                     }
+
+                    progressService.StopIndeterminateProgress(IndeterminateProgressKeys.RefreshPlaylist);
                     return true;
                 }
 
+            }
+            catch (Exception ex)
+            {
+                LogHelper.Instance.LogException(ex);
+            }
+            progressService.StopIndeterminateProgress(IndeterminateProgressKeys.RefreshPlaylist);
+            return false;
+        }
+
+        public async Task<bool> RefreshPlaylist(PlaylistModel playlist, IProgressService progressService)
+        {
+            try
+            {
+                playlist.ProgressService = new ProgressService();
+                if (await RefreshPlaylistWorker(playlist, playlist.ProgressService))
+                    return await _settingsRepository.SaveCache();
             }
             catch (Exception ex)
             {
@@ -128,10 +145,10 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Repositories
             {
                 var tot = playlist.Videos.Count(w => w.SaveStatus < SaveStatus.Finished);
                 progressService.ConfigurePercentageProgress(tot);
+                
                 await DownloadVideosForPlaylistWorker(playlist, progressService);
 
                 await _settingsRepository.SaveCache();
-
                 progressService.HidePercentageProgress();
                 return true;
             }
@@ -158,6 +175,7 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Repositories
         {
             try
             {
+                progressService.StartIndeterminateProgress(IndeterminateProgressKeys.GatheringPlaylists);
                 var youtubeService = await GetService();
 
                 if (youtubeService != null)
@@ -199,8 +217,12 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Repositories
                         }
 
                         playlist.ProgressService = new ProgressService();
-                        await RefreshPlaylist(playlist, playlist.ProgressService);
+                        await RefreshPlaylistWorker(playlist, playlist.ProgressService);
                     }
+
+                    await _settingsRepository.SaveCache();
+
+                    progressService.StopIndeterminateProgress(IndeterminateProgressKeys.GatheringPlaylists);
                     return true;
                 }
             }
@@ -208,6 +230,7 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Repositories
             {
                 LogHelper.Instance.LogException(ex);
             }
+            progressService.StopIndeterminateProgress(IndeterminateProgressKeys.GatheringPlaylists);
             return false;
         }
 
@@ -321,6 +344,8 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Repositories
                         };
                         InsertInOrder(model);
 
+                        await _settingsRepository.SaveCache();
+
                         return true;
                     }
                 }
@@ -336,15 +361,15 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Repositories
         {
             return new ObservableCollection<PlaylistModel>()
             {
-                GetExamplePlaylist(true),
-                GetExamplePlaylist(true),
-                GetExamplePlaylist(true),
-                GetExamplePlaylist(true),
+                GetExamplePlaylist(),
+                GetExamplePlaylist(),
+                GetExamplePlaylist(),
+                GetExamplePlaylist(),
                 GetExamplePlaylist(false),
                 GetExamplePlaylist(false),
-                GetExamplePlaylist(true),
-                GetExamplePlaylist(true),
-                GetExamplePlaylist(true),
+                GetExamplePlaylist(),
+                GetExamplePlaylist(),
+                GetExamplePlaylist(),
             };
         }
 
@@ -367,9 +392,9 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Repositories
                     GetExampleVideo(SaveStatus.FilledAutomaticProperties),
                     GetExampleVideo(SaveStatus.Saving),
                     GetExampleVideo(SaveStatus.Saved),
-                    GetExampleVideo(SaveStatus.Finished),
-                    GetExampleVideo(SaveStatus.Finished),
-                    GetExampleVideo(SaveStatus.Finished),
+                    GetExampleVideo(),
+                    GetExampleVideo(),
+                    GetExampleVideo(),
                     GetExampleVideo(SaveStatus.FailedDownloadOrConversion)
                 }
             };

@@ -1,15 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Famoser.FrameworkEssentials.Logging;
-using Famoser.FrameworkEssentials.Services.Interfaces;
 using Famoser.YoutubePlaylistDownloader.Business.Enums;
 using Famoser.YoutubePlaylistDownloader.Business.Helpers;
 using Famoser.YoutubePlaylistDownloader.Business.Models;
-using Famoser.YoutubePlaylistDownloader.Business.Models.Save;
 using Famoser.YoutubePlaylistDownloader.Business.Repositories.Interfaces;
 using Famoser.YoutubePlaylistDownloader.Business.Services.Interfaces;
 using Newtonsoft.Json;
@@ -47,6 +44,10 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Repositories
                 model.AlbumArtist = string.Join(", ", tagFile.Tag.AlbumArtists);
                 model.Genre = string.Join(", ", tagFile.Tag.Genres);
                 model.Year = tagFile.Tag.Year;
+                //todo
+                //tagFile.Tag.Disc = 1;
+                //tagFile.Tag.DiscCount = 1;
+                //tagFile.Tag.Track
 
                 if (tagFile.Tag.Pictures != null)
                 {

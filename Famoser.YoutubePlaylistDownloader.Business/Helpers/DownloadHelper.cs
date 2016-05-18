@@ -10,7 +10,6 @@ using Famoser.YoutubeExtractor.Portable.Helpers;
 using Famoser.YoutubeExtractor.Portable.Models;
 using Famoser.YoutubePlaylistDownloader.Business.Enums;
 using Famoser.YoutubePlaylistDownloader.Business.Models;
-using TagLib;
 
 namespace Famoser.YoutubePlaylistDownloader.Business.Helpers
 {

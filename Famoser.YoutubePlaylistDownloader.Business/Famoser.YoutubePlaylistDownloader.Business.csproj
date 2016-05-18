@@ -39,6 +39,7 @@
     <Compile Include="Attributes\DescriptionAttribute.cs" />
     <Compile Include="Enums\FileKeys.cs" />
     <Compile Include="Enums\FolderType.cs" />
+    <Compile Include="Enums\IndeterminateProgressKeys.cs" />
     <Compile Include="Enums\SaveStatus.cs" />
     <Compile Include="Helpers\Converters\BaseConverter.cs" />
     <Compile Include="Helpers\Converters\Mp3Converter.cs" />

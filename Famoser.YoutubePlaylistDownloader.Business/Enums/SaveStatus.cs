@@ -40,22 +40,22 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Enums
 
 
 
-        [Description("downloading...")]
+        [Description("failed :(")]
         FailedDownloadingResolvingUrl = 1111,
 
-        [Description("downloading...")]
+        [Description("failed :(")]
         FailedDownloading = 1110,
 
-        [Description("downloading...")]
+        [Description("failed :(")]
         FailedConverting = 1120,
 
-        [Description("downloading...")]
+        [Description("failed :(")]
         FailedDownloadOrConversion = 1666,
 
-        [Description("downloading...")]
+        [Description("failed :(")]
         FailedFillingAutomaticProperties = 1150,
 
-        [Description("downloading...")]
+        [Description("failed :(")]
         FailedSaving = 1130
     }
 }

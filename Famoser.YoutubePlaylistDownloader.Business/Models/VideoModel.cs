@@ -1,6 +1,4 @@
-﻿using Famoser.FrameworkEssentials.Services;
-using Famoser.FrameworkEssentials.Services.Interfaces;
-using Famoser.YoutubePlaylistDownloader.Business.Enums;
+﻿using Famoser.YoutubePlaylistDownloader.Business.Enums;
 
 namespace Famoser.YoutubePlaylistDownloader.Business.Models
 {
