@@ -9,6 +9,7 @@ using Famoser.YoutubePlaylistDownloader.Business.Enums;
 using Famoser.YoutubePlaylistDownloader.Business.Helpers;
 using Famoser.YoutubePlaylistDownloader.Business.Services.Interfaces;
 using UniversalEssentials.Platform;
+using File = TagLib.File;
 
 namespace Famoser.YoutubePlaylistDownloader.Presentation.UniversalWindows.Platform
 {
@@ -65,17 +66,54 @@ namespace Famoser.YoutubePlaylistDownloader.Presentation.UniversalWindows.Platfo
                 var fileName = Path.GetFileName(path);
                 var folder = Path.GetDirectoryName(path);
 
-                StorageFile storageFile = await (await GetFolder(type).GetFolderAsync(folder)).GetFileAsync(Path.Combine(folder, fileName));
+                StorageFile storageFile = await (await GetFolder(type).GetFolderAsync(folder)).GetFileAsync(fileName);
 
-                var randomAccessStream = await storageFile.OpenReadAsync();
+                var randomAccessStream = await storageFile.OpenAsync(FileAccessMode.Read);
                 return randomAccessStream.AsStreamForRead();
-
             }
             catch (Exception ex)
             {
                 LogHelper.Instance.LogException(ex);
             }
             return null;
+        }
+
+        public async Task<File.IFileAbstraction> GetTagLibFile(FolderType type, string path)
+        {
+            try
+            {
+                var fileName = Path.GetFileName(path);
+                var folder = Path.GetDirectoryName(path);
+
+                StorageFile storageFile = await (await GetFolder(type).GetFolderAsync(folder)).GetFileAsync(fileName);
+
+                var sfa = new StreamFileAbstraction(storageFile);
+                await sfa.Initialize();
+                return sfa;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.Instance.LogException(ex);
+            }
+            return null;
+        }
+
+        public async Task<bool> SaveTagLibFile(File.IFileAbstraction abstraction)
+        {
+            try
+            {
+                var abstr = abstraction as StreamFileAbstraction;
+                if (abstr != null)
+                {
+                    await FileIO.WriteBytesAsync(abstr.File, StreamHelper.StreamToByte(abstr.WriteStream));
+                    return true;
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.Instance.LogException(ex);
+            }
+            return false;
         }
 
         public async Task<bool> DeleteFilesInFolder(FolderType type, string folder, List<string> files)

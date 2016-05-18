@@ -106,6 +106,7 @@
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Converters\ByteToBitmapConverter.cs" />
     <Compile Include="Converters\SaveStatusConverter.cs" />
     <Compile Include="Converters\SaveStatusVisible.cs" />
     <Compile Include="Pages\MainPage.xaml.cs">
@@ -120,6 +121,7 @@
     <Compile Include="Platform\FolderStorageService.cs" />
     <Compile Include="Platform\CustomNavigationService.cs" />
     <Compile Include="Platform\PlatformService.cs" />
+    <Compile Include="Platform\StreamFileAbstraction.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UserControls\ProgressModel\ProgressModelBar.xaml.cs">
       <DependentUpon>ProgressModelBar.xaml</DependentUpon>

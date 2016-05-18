@@ -34,9 +34,8 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Repositories
             try
             {
                 var model = videoModel.Mp3Model;
-                var fileStream = await _folderStorageService.GetFile(Type, model.FilePath);
-                var tagFile = File.Create(new StreamFileAbstraction(model.FilePath,
-                    fileStream, fileStream));
+                var file = await _folderStorageService.GetTagLibFile(Type, model.FilePath);
+                var tagFile = File.Create(file);
 
                 model.Title = tagFile.Tag.Title;
                 model.Album = tagFile.Tag.Album;
@@ -71,8 +70,8 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Repositories
             {
                 var model = videoModel.Mp3Model;
                 //todo: move file if name changed
-                var fileStream = await _folderStorageService.GetFile(Type, model.FilePath);
-                var tagFile = File.Create(new StreamFileAbstraction(model.FilePath, fileStream, fileStream));
+                var file = await _folderStorageService.GetTagLibFile(Type, model.FilePath);
+                var tagFile = File.Create(file);
 
                 //save all tags
                 tagFile.Tag.Album = model.Album;
@@ -103,6 +102,7 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Repositories
                 }
 
                 tagFile.Save();
+                await _folderStorageService.SaveTagLibFile(file);
 
                 var recommendedFilePath = GetRecommendedFilePath(model);
                 if (model.FilePath != recommendedFilePath)

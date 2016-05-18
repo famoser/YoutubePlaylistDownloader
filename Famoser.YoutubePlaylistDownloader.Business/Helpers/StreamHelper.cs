@@ -19,6 +19,7 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Helpers
         }
         public static byte[] StreamToByte(Stream input)
         {
+            input.Position = 0;
             byte[] buffer = new byte[16 * 1024];
             using (MemoryStream ms = new MemoryStream())
             {

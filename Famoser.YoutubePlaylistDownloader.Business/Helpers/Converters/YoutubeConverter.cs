@@ -7,20 +7,28 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Helpers.Converters
     {
         public override TCache Convert(TModel model)
         {
-            return new TCache()
+            if (model != null)
             {
-                Id = model.Id,
-                Name = model.Name
-            };
+                return new TCache()
+                {
+                    Id = model.Id,
+                    Name = model.Name
+                };
+            }
+            return null;
         }
 
         public override TModel Convert(TCache model)
         {
-            return new TModel()
+            if (model != null)
             {
-                Id = model.Id,
-                Name = model.Name
-            };
+                return new TModel()
+                {
+                    Id = model.Id,
+                    Name = model.Name
+                };
+            }
+            return null;
         }
     }
 }

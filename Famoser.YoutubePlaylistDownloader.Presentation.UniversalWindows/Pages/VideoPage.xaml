@@ -5,17 +5,43 @@
     xmlns:local="using:Famoser.YoutubePlaylistDownloader.Presentation.UniversalWindows.Pages"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:converters="using:Famoser.YoutubePlaylistDownloader.Presentation.UniversalWindows.Converters"
     mc:Ignorable="d"
     DataContext="{Binding VideoViewModel, Source={StaticResource Locator}}">
 
+    <Page.Resources>
+        <converters:ByteToBitmapConverter x:Key="ByteToBitmapConverter" />
+    </Page.Resources>
+    
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
         <TextBlock Grid.Row="0" Text="{Binding SelectedVideo.Name}" Style="{StaticResource BigTexBlock}" />
-        <ProgressBar Grid.Row="0" Visibility="{Binding SelectedPlaylist.ProgressService.AnyProgressActive, Converter={StaticResource BoolToVisbilityConverter}}" Value="{Binding SelectedPlaylist.ProgressService.PercentageProgressActiveValue, Mode=TwoWay}" VerticalAlignment="Top" Maximum="{Binding SelectedPlaylist.ProgressService.PercentageProgressMaxValue}" Minimum="0" IsIndeterminate="{Binding SelectedPlaylist.ProgressService.IndeterminateProgressActive}"/>
-        <ListView Grid.Row="1" ItemContainerStyle="{ThemeResource StretchListViewItemStyle}" ItemsSource="{Binding SelectedPlaylist.Videos}" ItemTemplate="{StaticResource VideoDataTemplate}" />
+        <ProgressBar Grid.Row="0" Visibility="{Binding SelectedVideo.ProgressService.AnyProgressActive, Converter={StaticResource BoolToVisbilityConverter}}" Value="{Binding SelectedVideo.ProgressService.PercentageProgressActiveValue, Mode=TwoWay}" VerticalAlignment="Top" Maximum="{Binding SelectedPlaylist.ProgressService.PercentageProgressMaxValue}" Minimum="0" IsIndeterminate="{Binding SelectedVideo.ProgressService.IndeterminateProgressActive}"/>
+        <Grid Grid.Row="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <Grid Grid.Row="0" MaxHeight="300" Visibility="{Binding SelectedVideo.Mp3Model.AlbumCover, Mode=OneWay, Converter={StaticResource ReferenceToVisibilityConverter}}" >
+                <Image Stretch="UniformToFill" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0" Source="{Binding SelectedVideo.Mp3Model.AlbumCover, Converter={StaticResource ByteToBitmapConverter}}" />
+            </Grid>
+            <StackPanel Grid.Row="1">
+                <TextBlock Text="Title" Style="{StaticResource FlatTextBoxDescription}" />
+                <TextBox Text="{Binding SelectedVideo.Mp3Model.Title}" Style="{ThemeResource FlatTextBox}" />
+                <TextBlock Text="Artist (divide multiple by comma)" Style="{StaticResource FlatTextBoxDescription}" />
+                <TextBox Text="{Binding SelectedVideo.Mp3Model.Artist}" Style="{ThemeResource FlatTextBox}" />
+                <TextBlock Text="Album" Style="{StaticResource FlatTextBoxDescription}" />
+                <TextBox Text="{Binding SelectedVideo.Mp3Model.Album}" Style="{ThemeResource FlatTextBox}" />
+                <TextBlock Text="Album Artist (divide multiple by comma)" Style="{StaticResource FlatTextBoxDescription}" />
+                <TextBox Text="{Binding SelectedVideo.Mp3Model.AlbumArtist}" Style="{ThemeResource FlatTextBox}" />
+                <TextBlock Text="Genre (divide multiple by comma)" Style="{StaticResource FlatTextBoxDescription}" />
+                <TextBox Text="{Binding SelectedVideo.Mp3Model.Genre}" Style="{ThemeResource FlatTextBox}" />
+            </StackPanel>
+        </Grid>
     </Grid>
 
     <Page.BottomAppBar>

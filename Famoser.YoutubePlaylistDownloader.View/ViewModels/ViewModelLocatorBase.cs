@@ -3,6 +3,7 @@ using Famoser.FrameworkEssentials.Services.Interfaces;
 using Famoser.YoutubePlaylistDownloader.Business.Repositories;
 using Famoser.YoutubePlaylistDownloader.Business.Repositories.Interfaces;
 using GalaSoft.MvvmLight.Ioc;
+using Microsoft.Practices.ServiceLocation;
 
 namespace Famoser.YoutubePlaylistDownloader.View.ViewModels
 {
@@ -10,6 +11,8 @@ namespace Famoser.YoutubePlaylistDownloader.View.ViewModels
     {
         public ViewModelLocatorBase()
         {
+            ServiceLocator.SetLocatorProvider(() => SimpleIoc.Default);
+
             SimpleIoc.Default.Register<IProgressService, ProgressService>();
             SimpleIoc.Default.Register<IVideoRespository, VideoRepository>();
             SimpleIoc.Default.Register<ISettingsRepository, SettingsRepository>();

@@ -16,18 +16,14 @@ namespace Famoser.YoutubePlaylistDownloader.View.ViewModels
 {
     public class MainPageViewModel : ViewModelBase
     {
-        private readonly IVideoRespository _videoRespository;
         private readonly IPlaylistRepository _playlistRepository;
-        private readonly ISmartRepository _smartRepository;
         private readonly IProgressService _progressService;
 
         private readonly INavigationService _navigationService;
 
-        public MainPageViewModel(IVideoRespository videoRespository, IPlaylistRepository playlistRepository, ISmartRepository smartRepository, IProgressService progressService, INavigationService navigationService)
+        public MainPageViewModel(IPlaylistRepository playlistRepository, IProgressService progressService, INavigationService navigationService)
         {
-            _videoRespository = videoRespository;
             _playlistRepository = playlistRepository;
-            _smartRepository = smartRepository;
             _progressService = progressService;
             _navigationService = navigationService;
 
@@ -122,8 +118,8 @@ namespace Famoser.YoutubePlaylistDownloader.View.ViewModels
 
         public void SelectPlaylist(PlaylistModel model)
         {
-            _navigationService.NavigateTo(PageKeys.Mainpage.ToString());
-            Messenger.Default.Send(model);
+            _navigationService.NavigateTo(PageKeys.Playlist.ToString());
+            Messenger.Default.Send(model, Messages.Select);
         }
 
         private ObservableCollection<PlaylistModel> _playlists;

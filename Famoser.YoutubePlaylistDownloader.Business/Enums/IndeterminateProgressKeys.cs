@@ -3,6 +3,7 @@
     public enum IndeterminateProgressKeys
     {
         RefreshPlaylist,
+        RefreshPlaylists,
         GatheringPlaylists
     }
 }

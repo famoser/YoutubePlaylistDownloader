@@ -145,7 +145,7 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Repositories
             {
                 var tot = playlist.Videos.Count(w => w.SaveStatus < SaveStatus.Finished);
                 progressService.ConfigurePercentageProgress(tot);
-                
+
                 await DownloadVideosForPlaylistWorker(playlist, progressService);
 
                 await _settingsRepository.SaveCache();
@@ -165,7 +165,8 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Repositories
             {
                 foreach (var videoModel in playlistModel.Videos)
                 {
-                    videoModel.Mp3Model.VideoModel = videoModel;
+                    if (videoModel.Mp3Model != null)
+                        videoModel.Mp3Model.VideoModel = videoModel;
                     videoModel.PlaylistModel = playlistModel;
                 }
             }
@@ -199,6 +200,7 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Repositories
                         rawPlaylists.AddRange(response.Items);
                     }
 
+                    var ids = new List<string>();
                     foreach (var rawPlaylist in rawPlaylists)
                     {
                         PlaylistModel playlist;
@@ -211,14 +213,22 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Repositories
                             };
                             InsertInOrder(playlist);
                         }
-                        else
-                        {
-                            playlist = _playlists.FirstOrDefault(l => l.Id == rawPlaylist.Id);
-                        }
-
-                        playlist.ProgressService = new ProgressService();
-                        await RefreshPlaylistWorker(playlist, playlist.ProgressService);
+                        ids.Add(rawPlaylist.Id);
                     }
+
+                    var oldOnes = _playlists.Where(p => ids.All(i => i != p.Id)).ToList();
+                    foreach (var playlistModel in oldOnes)
+                    {
+                        _playlists.Remove(playlistModel);
+                    }
+
+                    progressService.StartIndeterminateProgress(IndeterminateProgressKeys.RefreshPlaylist);
+                    foreach (var playlistModel in _playlists.Where(p => p.Refresh))
+                    {
+                        playlistModel.ProgressService = new ProgressService();
+                        await RefreshPlaylistWorker(playlistModel, playlistModel.ProgressService);
+                    }
+                    progressService.StopIndeterminateProgress(IndeterminateProgressKeys.RefreshPlaylists);
 
                     await _settingsRepository.SaveCache();
 

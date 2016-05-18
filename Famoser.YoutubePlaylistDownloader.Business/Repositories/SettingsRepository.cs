@@ -6,6 +6,7 @@ using Famoser.YoutubePlaylistDownloader.Business.Helpers.Converters;
 using Famoser.YoutubePlaylistDownloader.Business.Models.Save;
 using Famoser.YoutubePlaylistDownloader.Business.Repositories.Interfaces;
 using Famoser.YoutubePlaylistDownloader.Business.Services.Interfaces;
+using GalaSoft.MvvmLight.Ioc;
 using Newtonsoft.Json;
 
 namespace Famoser.YoutubePlaylistDownloader.Business.Repositories
@@ -15,12 +16,10 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Repositories
         private ConfigurationModel _config;
         private CacheModel _cache;
         private readonly IFolderStorageService _folderStorageService;
-        private readonly IPlaylistRepository _playlistRepository;
 
-        public SettingsRepository(IFolderStorageService folderStorageService, IPlaylistRepository playlistRepository)
+        public SettingsRepository(IFolderStorageService folderStorageService)
         {
             _folderStorageService = folderStorageService;
-            _playlistRepository = playlistRepository;
         }
 
         private bool _isInitialized = false;
@@ -63,7 +62,7 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Repositories
             var converter = new PlaylistConverter();
             var cache = new CacheModel()
             {
-                CachedPlaylists = converter.Convert(await _playlistRepository.GetPlaylists())
+                CachedPlaylists = converter.Convert(await SimpleIoc.Default.GetInstance<IPlaylistRepository>().GetPlaylists())
             };
 
             return await _folderStorageService.SetCachedTextFileAsync(FileKeys.CacheFile.ToString(),

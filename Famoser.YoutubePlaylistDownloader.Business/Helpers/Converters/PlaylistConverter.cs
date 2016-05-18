@@ -7,20 +7,28 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Helpers.Converters
     {
         public override PlaylistCacheModel Convert(PlaylistModel model)
         {
-            var cacheModel = base.Convert(model);
-            cacheModel.Refresh = model.Refresh;
-            var converter = new VideoConverter();
-            cacheModel.VideoCacheModels = converter.Convert(model.Videos);
-            return cacheModel;
+            if (model != null)
+            {
+                var cacheModel = base.Convert(model);
+                cacheModel.Refresh = model.Refresh;
+                var converter = new VideoConverter();
+                cacheModel.VideoCacheModels = converter.Convert(model.Videos);
+                return cacheModel;
+            }
+            return null;
         }
 
         public override PlaylistModel Convert(PlaylistCacheModel model)
         {
-            var cacheModel = base.Convert(model);
-            cacheModel.Refresh = model.Refresh;
-            var converter = new VideoConverter();
-            cacheModel.Videos = converter.Convert(model.VideoCacheModels);
-            return cacheModel;
+            if (model != null)
+            {
+                var cacheModel = base.Convert(model);
+                cacheModel.Refresh = model.Refresh;
+                var converter = new VideoConverter();
+                cacheModel.Videos = converter.Convert(model.VideoCacheModels);
+                return cacheModel;
+            }
+            return null;
         }
     }
 }

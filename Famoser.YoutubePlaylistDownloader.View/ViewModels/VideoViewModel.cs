@@ -34,9 +34,10 @@ namespace Famoser.YoutubePlaylistDownloader.View.ViewModels
             }
         }
 
-        private void EvaluateSelectMessage(VideoModel obj)
+        private async void EvaluateSelectMessage(VideoModel obj)
         {
             SelectedVideo = obj;
+            await _videoRespository.LoadFromMusicLibrary(SelectedVideo);
         }
 
         private readonly RelayCommand _saveFile;
