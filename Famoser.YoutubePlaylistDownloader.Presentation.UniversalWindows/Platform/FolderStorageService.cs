@@ -14,35 +14,62 @@ namespace Famoser.YoutubePlaylistDownloader.Presentation.UniversalWindows.Platfo
 {
     public class FolderStorageService : StorageService, IFolderStorageService
     {
-        public async Task<List<string>> GetAllFilesFromFolder(FolderType type, string folder)
+        public async Task<bool> MoveFile(FolderType type, string path, string newPath)
         {
             try
             {
-                if (type == FolderType.Music)
-                {
-                    var files = await (await KnownFolders.MusicLibrary.GetFolderAsync(folder)).GetFilesAsync();
+                var fileName = Path.GetFileName(path);
+                var folder = Path.GetDirectoryName(path);
 
-                    return files.Select(storageFile => storageFile.Name).ToList();
+                StorageFile storageFile = await (await GetFolder(type).GetFolderAsync(folder)).GetFileAsync(Path.Combine(folder, fileName));
+
+                var newFileName = Path.GetFileName(newPath);
+                var newFolder = Path.GetDirectoryName(newPath);
+
+                if (folder == newFolder)
+                    await storageFile.RenameAsync(newFileName, NameCollisionOption.ReplaceExisting);
+                else
+                {
+                    var newStoragefolder = await GetFolder(type).CreateFolderAsync(folder, CreationCollisionOption.OpenIfExists);
+                    await storageFile.MoveAsync(newStoragefolder, newFileName);
                 }
+                return true;
+
             }
             catch (Exception ex)
             {
                 LogHelper.Instance.LogException(ex);
             }
-            return null;
+            return false;
         }
 
-        public async Task<Stream> GetFile(FolderType type, string path, string fileName)
+        public async Task<List<string>> GetAllFilesFromFolder(FolderType type, string folder)
         {
             try
             {
-                if (type == FolderType.Music)
-                {
-                    StorageFile storageFile = await (await KnownFolders.MusicLibrary.GetFolderAsync(path)).GetFileAsync(Path.Combine(path, fileName));
+                var files = await (await GetFolder(type).GetFolderAsync(folder)).GetFilesAsync();
 
-                    var randomAccessStream = await storageFile.OpenReadAsync();
-                    return randomAccessStream.AsStreamForRead();
-                }
+                return files.Select(storageFile => storageFile.Name).ToList();
+            }
+            catch (Exception ex)
+            {
+                LogHelper.Instance.LogException(ex);
+            }
+            return new List<string>();
+        }
+
+        public async Task<Stream> GetFile(FolderType type, string path)
+        {
+            try
+            {
+                var fileName = Path.GetFileName(path);
+                var folder = Path.GetDirectoryName(path);
+
+                StorageFile storageFile = await (await GetFolder(type).GetFolderAsync(folder)).GetFileAsync(Path.Combine(folder, fileName));
+
+                var randomAccessStream = await storageFile.OpenReadAsync();
+                return randomAccessStream.AsStreamForRead();
+
             }
             catch (Exception ex)
             {
@@ -55,16 +82,13 @@ namespace Famoser.YoutubePlaylistDownloader.Presentation.UniversalWindows.Platfo
         {
             try
             {
-                if (type == FolderType.Music)
+                var storageFiles = await (await GetFolder(type).GetFolderAsync(folder)).GetFilesAsync();
+                foreach (var storageFile in storageFiles)
                 {
-                    var storageFiles = await (await KnownFolders.MusicLibrary.GetFolderAsync(folder)).GetFilesAsync();
-                    foreach (var storageFile in storageFiles)
-                    {
-                        if (files.Any(f => f == storageFile.Name))
-                            await storageFile.DeleteAsync();
-                    }
-                    return true;
+                    if (files.Any(f => f == storageFile.Name))
+                        await storageFile.DeleteAsync();
                 }
+                return true;
             }
             catch (Exception ex)
             {
@@ -73,26 +97,33 @@ namespace Famoser.YoutubePlaylistDownloader.Presentation.UniversalWindows.Platfo
             return false;
         }
 
-        public async Task<bool> SaveFile(FolderType type, string path, string filename, Stream stream)
+        public async Task<bool> SaveFile(FolderType type, string path, Stream stream)
         {
             try
             {
-                if (type == FolderType.Music)
-                {
-                    await KnownFolders.MusicLibrary.CreateFolderAsync(path);
+                var fileName = Path.GetFileName(path);
+                var folder = Path.GetDirectoryName(path);
+                var storageFolder = GetFolder(type);
 
-                    var si = await (await KnownFolders.MusicLibrary.GetFolderAsync(path)).CreateFileAsync(Path.Combine(path, filename),
-                            CreationCollisionOption.ReplaceExisting);
+                var storageSubFolder = await storageFolder.CreateFolderAsync(folder, CreationCollisionOption.OpenIfExists);
 
-                    await FileIO.WriteBytesAsync(si, StreamHelper.StreamToByte(stream));
-                    return true;
-                }
+                var si = await storageSubFolder.CreateFileAsync(fileName, CreationCollisionOption.ReplaceExisting);
+
+                await FileIO.WriteBytesAsync(si, StreamHelper.StreamToByte(stream));
+                return true;
             }
             catch (Exception ex)
             {
                 LogHelper.Instance.LogException(ex, this);
             }
             return false;
+        }
+
+        private StorageFolder GetFolder(FolderType folder)
+        {
+            if (folder == FolderType.Music)
+                return KnownFolders.MusicLibrary;
+            return ApplicationData.Current.LocalCacheFolder;
         }
     }
 }

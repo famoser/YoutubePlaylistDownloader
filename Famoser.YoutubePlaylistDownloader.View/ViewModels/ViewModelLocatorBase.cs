@@ -15,10 +15,14 @@ namespace Famoser.YoutubePlaylistDownloader.View.ViewModels
             SimpleIoc.Default.Register<ISettingsRepository, SettingsRepository>();
             SimpleIoc.Default.Register<ISmartRepository, SmartRepository>();
             SimpleIoc.Default.Register<IPlaylistRepository, PlaylistRepository>();
-                
+
             SimpleIoc.Default.Register<MainPageViewModel>();
+            SimpleIoc.Default.Register<PlaylistViewModel>();
+            SimpleIoc.Default.Register<VideoViewModel>();
         }
 
         public MainPageViewModel MainPageViewModel => SimpleIoc.Default.GetInstance<MainPageViewModel>();
+        public PlaylistViewModel PlaylistViewModel => SimpleIoc.Default.GetInstance<PlaylistViewModel>();
+        public VideoViewModel VideoViewModel => SimpleIoc.Default.GetInstance<VideoViewModel>();
     }
 }
