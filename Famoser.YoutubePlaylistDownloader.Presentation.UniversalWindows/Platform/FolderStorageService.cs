@@ -22,7 +22,7 @@ namespace Famoser.YoutubePlaylistDownloader.Presentation.UniversalWindows.Platfo
                 var fileName = Path.GetFileName(path);
                 var folder = Path.GetDirectoryName(path);
 
-                StorageFile storageFile = await (await GetFolder(type).GetFolderAsync(folder)).GetFileAsync(Path.Combine(folder, fileName));
+                StorageFile storageFile = await (await GetFolder(type).GetFolderAsync(folder)).GetFileAsync(fileName);
 
                 var newFileName = Path.GetFileName(newPath);
                 var newFolder = Path.GetDirectoryName(newPath);

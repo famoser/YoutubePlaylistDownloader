@@ -57,7 +57,7 @@
                             <TextBlock Text="{Binding SelectedVideo.Mp3Model.FileInfo.SaveDate, Converter={StaticResource DateTimeConverter}}" Style="{StaticResource SecondaryTexBlock}" />
                         </StackPanel>
                         <StackPanel Grid.Column="1">
-                            <TextBlock Text="Duration" Style="{StaticResource FlatTextBoxDescription}" />
+                            <TextBlock Text="Audio Bitrate (kbps)" Style="{StaticResource FlatTextBoxDescription}" />
                             <TextBlock Text="{Binding SelectedVideo.Mp3Model.FileInfo.AudioBitrate}" Style="{StaticResource SecondaryTexBlock}" />
                             <TextBlock Text="Created program version" Style="{StaticResource FlatTextBoxDescription}" />
                             <TextBlock Text="{Binding SelectedVideo.Mp3Model.FileInfo.CreatedProgramVersion}" Style="{StaticResource SecondaryTexBlock}" />
