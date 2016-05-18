@@ -198,8 +198,8 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Repositories
                             playlist = _playlists.FirstOrDefault(l => l.Id == rawPlaylist.Id);
                         }
 
-                        playlist.ProgressServie = new ProgressService();
-                        await RefreshPlaylist(playlist, playlist.ProgressServie);
+                        playlist.ProgressService = new ProgressService();
+                        await RefreshPlaylist(playlist, playlist.ProgressService);
                     }
                     return true;
                 }
@@ -243,8 +243,8 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Repositories
                 {
                     if (videoModel.SaveStatus < SaveStatus.Finished)
                     {
-                        videoModel.ProgressServie = new ProgressService();
-                        var stream = await DownloadHelper.DownloadYoutubeVideo(videoModel, videoModel.ProgressServie);
+                        videoModel.ProgressService = new ProgressService();
+                        var stream = await DownloadHelper.DownloadYoutubeVideo(videoModel, videoModel.ProgressService);
                         if (stream != null &&
                             await _videoRespository.CreateToMusicLibrary(videoModel, stream) &&
                             await _smartRepository.FillAutomaticProperties(videoModel.Mp3Model))
@@ -392,8 +392,8 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Repositories
             vm.Mp3Model.VideoModel = vm;
             if (vm.SaveStatus < SaveStatus.Finished)
             {
-                vm.ProgressServie = new ProgressService();
-                vm.ProgressServie.ConfigurePercentageProgress(100, 20);
+                vm.ProgressService = new ProgressService();
+                vm.ProgressService.ConfigurePercentageProgress(100, 20);
             }
             return vm;
         }

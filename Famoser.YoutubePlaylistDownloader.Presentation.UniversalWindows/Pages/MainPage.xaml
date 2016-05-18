@@ -1,0 +1,48 @@
+﻿<Page
+    x:Class="Famoser.YoutubePlaylistDownloader.Presentation.UniversalWindows.MainPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:Famoser.YoutubePlaylistDownloader.Presentation.UniversalWindows"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    DataContext="{Binding MainPageViewModel, Source={StaticResource Locator}}">
+
+    <Page.Resources>
+        <DataTemplate x:Key="PlaylistDataTemplate">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="40" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="40" />
+                </Grid.ColumnDefinitions>
+                <CheckBox Grid.Column="0" Style="{StaticResource FlatChekbox}" IsChecked="{Binding Refresh, Mode=TwoWay}" />
+                <TextBlock VerticalAlignment="Center" Style="{ThemeResource SecondaryBigTexBlock}" Grid.Column="1" Text="{Binding Name}" />
+                <Button Grid.Column="2" Style="{StaticResource FlatButton}" Command="{Binding MainPageViewModel.SelectPlaylistCommand, Source={StaticResource Locator}}" CommandParameter="{Binding }">
+                    <Button.Content>
+                        <SymbolIcon Symbol="Forward" />
+                    </Button.Content>
+                </Button>
+            </Grid>
+        </DataTemplate>
+    </Page.Resources>
+
+    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <TextBlock Grid.Row="0" Text="Youtube Playlist Downloader" Style="{StaticResource BigTexBlock}" />
+        <ProgressBar Grid.Row="0" Visibility="{Binding ProgressService.AnyProgressActive, Converter={StaticResource BoolToVisbilityConverter}}" Value="{Binding ProgressService.PercentageProgressActiveValue, Mode=TwoWay}" VerticalAlignment="Top" Maximum="{Binding ProgressService.PercentageProgressMaxValue}" Minimum="0" IsIndeterminate="{Binding ProgressService.IndeterminateProgressActive}"/>
+        <ListView Grid.Row="1" ItemContainerStyle="{ThemeResource StretchListViewItemStyle}" ItemsSource="{Binding Playlists}" ItemTemplate="{StaticResource PlaylistDataTemplate}" />
+    </Grid>
+
+    <Page.BottomAppBar>
+        <CommandBar>
+            <CommandBar.PrimaryCommands>
+                <AppBarButton Icon="Refresh" Command="{Binding RefreshPlaylistsCommand}" />
+                <AppBarButton Icon="Download" Command="{Binding StartDownloadCommand}" />
+            </CommandBar.PrimaryCommands>
+        </CommandBar>
+    </Page.BottomAppBar>
+</Page>

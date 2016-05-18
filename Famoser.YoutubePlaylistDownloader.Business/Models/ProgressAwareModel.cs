@@ -9,11 +9,11 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Models
 {
     public class ProgressAwareModel : BaseModel
     {
-        private ProgressService _progressServie;
-        public ProgressService ProgressServie
+        private ProgressService _progressService;
+        public ProgressService ProgressService
         {
-            get { return _progressServie; }
-            set { Set(ref _progressServie, value); }
+            get { return _progressService; }
+            set { Set(ref _progressService, value); }
         }
     }
 }

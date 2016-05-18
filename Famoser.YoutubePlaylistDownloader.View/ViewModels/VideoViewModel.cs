@@ -51,7 +51,7 @@ namespace Famoser.YoutubePlaylistDownloader.View.ViewModels
             _saveFile.RaiseCanExecuteChanged();
 
             //todo: check status of file
-            SelectedVideo.ProgressServie = new ProgressService();
+            SelectedVideo.ProgressService = new ProgressService();
             await _videoRespository.SaveToMusicLibrary(SelectedVideo);
 
             _saveFileActive = false;

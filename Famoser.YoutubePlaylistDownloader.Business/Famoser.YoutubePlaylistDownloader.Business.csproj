@@ -36,6 +36,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Attributes\DescriptionAttribute.cs" />
     <Compile Include="Enums\FileKeys.cs" />
     <Compile Include="Enums\FolderType.cs" />
     <Compile Include="Enums\SaveStatus.cs" />

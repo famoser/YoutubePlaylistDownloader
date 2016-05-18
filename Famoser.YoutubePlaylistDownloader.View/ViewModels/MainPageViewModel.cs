@@ -2,11 +2,15 @@
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows.Input;
+using Famoser.FrameworkEssentials.Services;
 using Famoser.FrameworkEssentials.Services.Interfaces;
 using Famoser.YoutubePlaylistDownloader.Business.Models;
 using Famoser.YoutubePlaylistDownloader.Business.Repositories.Interfaces;
+using Famoser.YoutubePlaylistDownloader.View.Enums;
 using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Command;
+using GalaSoft.MvvmLight.Messaging;
+using GalaSoft.MvvmLight.Views;
 
 namespace Famoser.YoutubePlaylistDownloader.View.ViewModels
 {
@@ -17,16 +21,20 @@ namespace Famoser.YoutubePlaylistDownloader.View.ViewModels
         private readonly ISmartRepository _smartRepository;
         private readonly IProgressService _progressService;
 
-        public MainPageViewModel(IVideoRespository videoRespository, IPlaylistRepository playlistRepository, ISmartRepository smartRepository, IProgressService progressService)
+        private readonly INavigationService _navigationService;
+
+        public MainPageViewModel(IVideoRespository videoRespository, IPlaylistRepository playlistRepository, ISmartRepository smartRepository, IProgressService progressService, INavigationService navigationService)
         {
             _videoRespository = videoRespository;
             _playlistRepository = playlistRepository;
             _smartRepository = smartRepository;
             _progressService = progressService;
+            _navigationService = navigationService;
 
             _refreshPlaylists = new RelayCommand(RefreshPlaylist, () => CanExecuteRefreshPlaylistsCommand);
             _startDownload = new RelayCommand(StartDownload, () => CanExecuteStartDownloadCommand);
             _addToPlaylistsCommand = new RelayCommand(AddToPlaylist, () => CanExecuteAddToPlaylistCommand);
+            _selectPlaylist = new RelayCommand<PlaylistModel>(SelectPlaylist);
 
             if (IsInDesignMode)
             {
@@ -43,10 +51,12 @@ namespace Famoser.YoutubePlaylistDownloader.View.ViewModels
             Playlists = await _playlistRepository.GetPlaylists();
         }
 
+        public ProgressService ProgressService => _progressService as ProgressService;
+
         private readonly RelayCommand _refreshPlaylists;
         public ICommand RefreshPlaylistsCommand => _refreshPlaylists;
 
-        public bool CanExecuteRefreshPlaylistsCommand => !_refreshPlaylistsActive;
+        private bool CanExecuteRefreshPlaylistsCommand => !_refreshPlaylistsActive;
 
         private bool _refreshPlaylistsActive;
         public async void RefreshPlaylist()
@@ -63,7 +73,7 @@ namespace Famoser.YoutubePlaylistDownloader.View.ViewModels
         private readonly RelayCommand _startDownload;
         public ICommand StartDownloadCommand => _startDownload;
 
-        public bool CanExecuteStartDownloadCommand => Playlists != null && Playlists.Any() && !_startDownloadActive;
+        private bool CanExecuteStartDownloadCommand => Playlists != null && Playlists.Any() && !_startDownloadActive;
 
         private bool _startDownloadActive;
         public async void StartDownload()
@@ -90,15 +100,9 @@ namespace Famoser.YoutubePlaylistDownloader.View.ViewModels
         }
 
         private readonly RelayCommand _addToPlaylistsCommand;
-        public ICommand AddToPlaylistCommand
-        {
-            get { return _addToPlaylistsCommand; }
-        }
+        public ICommand AddToPlaylistCommand => _addToPlaylistsCommand;
 
-        public bool CanExecuteAddToPlaylistCommand
-        {
-            get { return !string.IsNullOrEmpty(PlaylistLink) && !_isAddingPlaylist; }
-        }
+        private bool CanExecuteAddToPlaylistCommand => !string.IsNullOrEmpty(PlaylistLink) && !_isAddingPlaylist;
 
         private bool _isAddingPlaylist;
         public async void AddToPlaylist()
@@ -111,6 +115,15 @@ namespace Famoser.YoutubePlaylistDownloader.View.ViewModels
 
             _isAddingPlaylist = false;
             _addToPlaylistsCommand.RaiseCanExecuteChanged();
+        }
+
+        private readonly RelayCommand<PlaylistModel> _selectPlaylist;
+        public ICommand SelectPlaylistCommand => _selectPlaylist;
+
+        public void SelectPlaylist(PlaylistModel model)
+        {
+            _navigationService.NavigateTo(PageKeys.Mainpage.ToString());
+            Messenger.Default.Send(model);
         }
 
         private ObservableCollection<PlaylistModel> _playlists;
