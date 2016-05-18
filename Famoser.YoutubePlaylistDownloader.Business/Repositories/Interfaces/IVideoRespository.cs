@@ -5,10 +5,10 @@ using Famoser.YoutubePlaylistDownloader.Business.Models;
 
 namespace Famoser.YoutubePlaylistDownloader.Business.Repositories.Interfaces
 {
-    public interface IMp3Respository
+    public interface IVideoRespository
     {
-        Task<bool> LoadFile(Mp3Model model);
-        Task<bool> SaveFile(Mp3Model model);
-        Task<bool> CreateFile(VideoModel video, Stream fileStream);
+        Task<bool> LoadFromMusicLibrary(VideoModel model);
+        Task<bool> SaveToMusicLibrary(VideoModel model);
+        Task<bool> CreateToMusicLibrary(VideoModel video, Stream fileStream);
     }
 }

@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using Famoser.FrameworkEssentials.Logging;
 using Famoser.YoutubePlaylistDownloader.Business.Enums;
+using Famoser.YoutubePlaylistDownloader.Business.Helpers.Converters;
 using Famoser.YoutubePlaylistDownloader.Business.Models.Save;
 using Famoser.YoutubePlaylistDownloader.Business.Repositories.Interfaces;
 using Famoser.YoutubePlaylistDownloader.Business.Services.Interfaces;
@@ -14,10 +15,12 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Repositories
         private ConfigurationModel _config;
         private CacheModel _cache;
         private readonly IFolderStorageService _folderStorageService;
+        private readonly IPlaylistRepository _playlistRepository;
 
-        public SettingsRepository(IFolderStorageService folderStorageService)
+        public SettingsRepository(IFolderStorageService folderStorageService, IPlaylistRepository playlistRepository)
         {
             _folderStorageService = folderStorageService;
+            _playlistRepository = playlistRepository;
         }
 
         private bool _isInitialized = false;
@@ -55,9 +58,15 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Repositories
             return _cache;
         }
 
-        public Task<bool> SaveCache(CacheModel cache)
+        public async Task<bool> SaveCache()
         {
-            return _folderStorageService.SetCachedTextFileAsync(FileKeys.CacheFile.ToString(),
+            var converter = new PlaylistConverter();
+            var cache = new CacheModel()
+            {
+                CachedPlaylists = converter.Convert(await _playlistRepository.GetPlaylists())
+            };
+
+            return await _folderStorageService.SetCachedTextFileAsync(FileKeys.CacheFile.ToString(),
                 JsonConvert.SerializeObject(cache));
         }
     }

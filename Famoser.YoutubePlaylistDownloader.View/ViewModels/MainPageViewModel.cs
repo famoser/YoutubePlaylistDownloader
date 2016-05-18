@@ -12,33 +12,25 @@ namespace Famoser.YoutubePlaylistDownloader.View.ViewModels
 {
     public class MainPageViewModel : ViewModelBase
     {
-        private readonly IMp3Respository _mp3Respository;
+        private readonly IVideoRespository _videoRespository;
         private readonly IPlaylistRepository _playlistRepository;
         private readonly ISmartRepository _smartRepository;
         private readonly IProgressService _progressService;
 
-        public MainPageViewModel(IMp3Respository mp3Respository, IPlaylistRepository playlistRepository, ISmartRepository smartRepository, IProgressService progressService)
+        public MainPageViewModel(IVideoRespository videoRespository, IPlaylistRepository playlistRepository, ISmartRepository smartRepository, IProgressService progressService)
         {
-            _mp3Respository = mp3Respository;
+            _videoRespository = videoRespository;
             _playlistRepository = playlistRepository;
             _smartRepository = smartRepository;
             _progressService = progressService;
 
+            _refreshPlaylists = new RelayCommand(RefreshPlaylist, () => CanExecuteRefreshPlaylistsCommand);
             _startDownload = new RelayCommand(StartDownload, () => CanExecuteStartDownloadCommand);
             _addToPlaylistsCommand = new RelayCommand(AddToPlaylist, () => CanExecuteAddToPlaylistCommand);
 
             if (IsInDesignMode)
             {
-                Playlists = new ObservableCollection<PlaylistModel>();
-                for (int i = 0; i < 20; i++)
-                {
-                    var model = new PlaylistModel()
-                    {
-                        Refresh = Convert.ToBoolean(i % 2),
-                        Name = "name " + i,
-                    };
-                    Playlists.Add(model);
-                }
+                Playlists = _playlistRepository.GetDesignCollection();
             }
             else
             {
@@ -51,16 +43,27 @@ namespace Famoser.YoutubePlaylistDownloader.View.ViewModels
             Playlists = await _playlistRepository.GetPlaylists();
         }
 
-        private readonly RelayCommand _startDownload;
-        public ICommand StartDownloadCommand
+        private readonly RelayCommand _refreshPlaylists;
+        public ICommand RefreshPlaylistsCommand => _refreshPlaylists;
+
+        public bool CanExecuteRefreshPlaylistsCommand => !_refreshPlaylistsActive;
+
+        private bool _refreshPlaylistsActive;
+        public async void RefreshPlaylist()
         {
-            get { return _startDownload; }
+            _refreshPlaylistsActive = true;
+            _refreshPlaylists.RaiseCanExecuteChanged();
+
+            await _playlistRepository.RefreshAllPlaylists(_progressService);
+
+            _refreshPlaylistsActive = false;
+            _refreshPlaylists.RaiseCanExecuteChanged();
         }
 
-        public bool CanExecuteStartDownloadCommand
-        {
-            get { return Playlists != null && Playlists.Any() && !_startDownloadActive; }
-        }
+        private readonly RelayCommand _startDownload;
+        public ICommand StartDownloadCommand => _startDownload;
+
+        public bool CanExecuteStartDownloadCommand => Playlists != null && Playlists.Any() && !_startDownloadActive;
 
         private bool _startDownloadActive;
         public async void StartDownload()
@@ -68,10 +71,8 @@ namespace Famoser.YoutubePlaylistDownloader.View.ViewModels
             _startDownloadActive = true;
             _startDownload.RaiseCanExecuteChanged();
 
-            await _playlistRepository.DownloadVideos(_progressService);
-            _smartRepository.AssignMetaTags(Playlists);
-            await _mp3Respository.SavePlaylists(Playlists);
-            
+            await _playlistRepository.DownloadVideosForAllPlaylists(_progressService);
+
             _startDownloadActive = false;
             _startDownload.RaiseCanExecuteChanged();
         }
@@ -96,19 +97,20 @@ namespace Famoser.YoutubePlaylistDownloader.View.ViewModels
 
         public bool CanExecuteAddToPlaylistCommand
         {
-            get { return !string.IsNullOrEmpty(PlaylistLink); }
+            get { return !string.IsNullOrEmpty(PlaylistLink) && !_isAddingPlaylist; }
         }
 
+        private bool _isAddingPlaylist;
         public async void AddToPlaylist()
         {
-            var playlist = await _playlistRepository.AddNewPlaylistByLink(PlaylistLink);
+            _isAddingPlaylist = true;
+            _addToPlaylistsCommand.RaiseCanExecuteChanged();
+
+            await _playlistRepository.AddNewPlaylistByLink(PlaylistLink);
             PlaylistLink = null;
-            if (playlist != null)
-            {
-                Playlists.Add(playlist);
-                _startDownload.RaiseCanExecuteChanged();
-            }
-            _playListLink = null;
+
+            _isAddingPlaylist = false;
+            _addToPlaylistsCommand.RaiseCanExecuteChanged();
         }
 
         private ObservableCollection<PlaylistModel> _playlists;
@@ -120,13 +122,6 @@ namespace Famoser.YoutubePlaylistDownloader.View.ViewModels
                 if (Set(ref _playlists, value))
                     _startDownload.RaiseCanExecuteChanged();
             }
-        }
-        
-        private Mp3Model _selectedMp3File;
-        public Mp3Model SelectedMp3File
-        {
-            get { return _selectedMp3File; }
-            set { Set(ref _selectedMp3File, value); }
         }
     }
 }

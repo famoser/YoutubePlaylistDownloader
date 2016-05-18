@@ -13,9 +13,8 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Helpers.Converters
                AlbumArtist = model.AlbumArtist,
                Artist = model.Artist,
                Genre = model.Genre,
-               SavePath = model.SavePath,
+               FilePath = model.FilePath,
                Title = model.Title,
-               VideoTitle = model.VideoTitle,
                Year = model.Year
            };
        }
@@ -28,9 +27,8 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Helpers.Converters
                 AlbumArtist = model.AlbumArtist,
                 Artist = model.Artist,
                 Genre = model.Genre,
-                SavePath = model.SavePath,
+                FilePath = model.FilePath,
                 Title = model.Title,
-                VideoTitle = model.VideoTitle,
                 Year = model.Year
             };
        }

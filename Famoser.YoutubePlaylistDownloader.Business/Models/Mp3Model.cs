@@ -55,7 +55,7 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Models
             set { Set(ref _albumCover, value); }
         }
 
-        public string SavePath { get; set; }
+        public string FilePath { get; set; }
 
         public VideoModel VideoModel { get; set; }
 

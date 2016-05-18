@@ -18,23 +18,27 @@ using TagLib.Id3v2;
 
 namespace Famoser.YoutubePlaylistDownloader.Business.Repositories
 {
-    public class Mp3Repository : IMp3Respository
+    public class VideoRepository : IVideoRespository
     {
         private readonly IFolderStorageService _folderStorageService;
+        private readonly ISettingsRepository _settingsRepository;
         private static readonly FolderType Type = FolderType.Music;
         private static readonly string SubFolder = "youtube";
 
-        public Mp3Repository(IFolderStorageService folderStorageService)
+        public VideoRepository(IFolderStorageService folderStorageService, ISettingsRepository settingsRepository)
         {
             _folderStorageService = folderStorageService;
+            _settingsRepository = settingsRepository;
         }
-        
-        public async Task<bool> LoadFile(Mp3Model model)
+
+
+        public async Task<bool> LoadFromMusicLibrary(VideoModel videoModel)
         {
             try
             {
-                var fileStream = await _folderStorageService.GetFile(Type, model.SavePath);
-                var tagFile = File.Create(new StreamFileAbstraction(model.SavePath,
+                var model = videoModel.Mp3Model;
+                var fileStream = await _folderStorageService.GetFile(Type, model.FilePath);
+                var tagFile = File.Create(new StreamFileAbstraction(model.FilePath,
                     fileStream, fileStream));
 
                 model.Title = tagFile.Tag.Title;
@@ -57,20 +61,22 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Repositories
                 LogHelper.Instance.LogException(ex);
             }
             return false;
+
         }
 
-        public async Task<bool> SaveFile(Mp3Model model)
+        public async Task<bool> SaveToMusicLibrary(VideoModel videoModel)
         {
             try
             {
+                var model = videoModel.Mp3Model;
                 //todo: move file if name changed
-                var fileStream = await _folderStorageService.GetFile(Type, model.SavePath);
-                var tagFile = File.Create(new StreamFileAbstraction(model.SavePath, fileStream, fileStream));
-                
+                var fileStream = await _folderStorageService.GetFile(Type, model.FilePath);
+                var tagFile = File.Create(new StreamFileAbstraction(model.FilePath, fileStream, fileStream));
+
                 //save all tags
                 tagFile.Tag.Album = model.Album;
                 tagFile.Tag.Title = model.Title;
-                tagFile.Tag.AlbumArtists = model.AlbumArtist.Split(new []{", "}, StringSplitOptions.RemoveEmptyEntries);
+                tagFile.Tag.AlbumArtists = model.AlbumArtist.Split(new[] { ", " }, StringSplitOptions.RemoveEmptyEntries);
                 tagFile.Tag.Performers = model.Artist.Split(new[] { ", " }, StringSplitOptions.RemoveEmptyEntries);
                 tagFile.Tag.Genres = model.Genre.Split(new[] { ", " }, StringSplitOptions.RemoveEmptyEntries);
                 tagFile.Tag.Year = model.Year;
@@ -96,6 +102,14 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Repositories
                 }
 
                 tagFile.Save();
+
+                var recommendedFilePath = GetRecommendedFilePath(model);
+                if (model.FilePath != recommendedFilePath)
+                {
+                    await _folderStorageService.MoveFile(FolderType.Music, model.FilePath, recommendedFilePath);
+                    model.FilePath = recommendedFilePath;
+                    await _settingsRepository.SaveCache();
+                }
                 return true;
             }
             catch (Exception ex)
@@ -105,7 +119,7 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Repositories
             return false;
         }
 
-        public async Task<bool> CreateFile(VideoModel video, Stream fileStream)
+        public async Task<bool> CreateToMusicLibrary(VideoModel video, Stream fileStream)
         {
             try
             {
@@ -120,7 +134,7 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Repositories
                 var filePath = GetRecommendedFilePath(mp3Model);
                 if (await _folderStorageService.SaveFile(Type, filePath, fileStream))
                 {
-                    mp3Model.SavePath = filePath;
+                    mp3Model.FilePath = filePath;
                     mp3Model.VideoModel = video;
                     video.Mp3Model = mp3Model;
                     video.SaveStatus = SaveStatus.Saved;
@@ -137,7 +151,7 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Repositories
 
         private string GetRecommendedFilePath(Mp3Model model)
         {
-            return Path.Combine(SubFolder, model.VideoModel.PlaylistModel.Id, model.GetRecommendedFileName());
+            return Path.Combine(SubFolder, model.VideoModel.PlaylistModel.Name, model.GetRecommendedFileName());
         }
     }
 }

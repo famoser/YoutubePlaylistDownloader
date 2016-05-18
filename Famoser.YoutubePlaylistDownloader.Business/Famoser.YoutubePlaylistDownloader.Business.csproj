@@ -48,6 +48,7 @@
     <Compile Include="Helpers\StreamHelper.cs" />
     <Compile Include="Models\BaseModel.cs" />
     <Compile Include="Models\Data\Mp3FileMetaData.cs" />
+    <Compile Include="Models\ProgressAwareModel.cs" />
     <Compile Include="Models\Save\ConfigurationModel.cs" />
     <Compile Include="Models\Mp3Model.cs" />
     <Compile Include="Models\PlaylistModel.cs" />
@@ -62,9 +63,9 @@
     <Compile Include="Repositories\Interfaces\ISmartRepository.cs" />
     <Compile Include="Repositories\Interfaces\IPlaylistRepository.cs" />
     <Compile Include="Repositories\SmartRepository.cs" />
-    <Compile Include="Repositories\Interfaces\IMp3Respository.cs" />
+    <Compile Include="Repositories\Interfaces\IVideoRespository.cs" />
     <Compile Include="Repositories\Interfaces\ISettingsRepository.cs" />
-    <Compile Include="Repositories\Mp3Repository.cs" />
+    <Compile Include="Repositories\VideoRepository.cs" />
     <Compile Include="Repositories\SettingsRepository.cs" />
     <Compile Include="Repositories\PlaylistRepository.cs" />
     <Compile Include="Helpers\DownloadHelper.cs" />

@@ -13,6 +13,7 @@ using Famoser.YoutubePlaylistDownloader.Business.Enums;
 using Famoser.YoutubePlaylistDownloader.Business.Helpers;
 using Famoser.YoutubePlaylistDownloader.Business.Helpers.Converters;
 using Famoser.YoutubePlaylistDownloader.Business.Models;
+using Famoser.YoutubePlaylistDownloader.Business.Models.Save;
 using Famoser.YoutubePlaylistDownloader.Business.Repositories.Interfaces;
 using Famoser.YoutubePlaylistDownloader.Business.Services.Interfaces;
 using Google.Apis.Auth.OAuth2;
@@ -25,15 +26,15 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Repositories
     public class PlaylistRepository : IPlaylistRepository
     {
         private readonly ISettingsRepository _settingsRepository;
-        private readonly IMp3Respository _mp3Respository;
+        private readonly IVideoRespository _videoRespository;
         private readonly ISmartRepository _smartRepository;
         private readonly IPlatformService _platformService;
 
-        public PlaylistRepository(ISettingsRepository settingsRepository, IPlatformService platformService, IMp3Respository mp3Respository, ISmartRepository smartRepository)
+        public PlaylistRepository(ISettingsRepository settingsRepository, IPlatformService platformService, IVideoRespository videoRespository, ISmartRepository smartRepository)
         {
             _settingsRepository = settingsRepository;
             _platformService = platformService;
-            _mp3Respository = mp3Respository;
+            _videoRespository = videoRespository;
             _smartRepository = smartRepository;
         }
 
@@ -66,6 +67,81 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Repositories
             return _playlists;
         }
 
+        public async Task<bool> RefreshPlaylist(PlaylistModel playlist, IProgressService progressService)
+        {
+            try
+            {
+                var youtubeService = await GetService();
+
+                if (youtubeService != null)
+                {
+                    //Get 5000 videos from a uploads playlist
+                    var plistItemsListRequestBuilder = new PlaylistItemsListRequestBuilder(youtubeService, "snippet, contentDetails")
+                    {
+                        PlaylistId = playlist.Id
+                    };
+                    var playlistItemsRequestService =
+                        new YoutubeListRequestService
+                            <PlaylistItemsResource.ListRequest, PlaylistItemListResponse, PlaylistItem>
+                            (plistItemsListRequestBuilder);
+
+                    var obj = (await playlistItemsRequestService.ExecuteConcurrentAsync(new PageTokenRequestRange(5000))).ToList();
+
+                    for (int index = 0; index < obj.Count; index++)
+                    {
+                        var playlistItem = obj.ToList()[index];
+                        var video = playlist.Videos.FirstOrDefault(v => v.Id == playlistItem.ContentDetails.VideoId);
+
+                        if (video != null)
+                        {
+                            playlist.Videos.Remove(video);
+                            video.Name = playlistItem.Snippet.Title;
+                        }
+                        else
+                        {
+                            video = new VideoModel
+                            {
+                                Id = playlistItem.ContentDetails.VideoId,
+                                Name = playlistItem.Snippet.Title,
+                                PlaylistModel = playlist
+                            };
+                        }
+                        if (playlist.Videos.Count < index)
+                            playlist.Videos.Insert(index, video);
+                        else
+                            playlist.Videos.Add(video);
+                    }
+                    return true;
+                }
+
+            }
+            catch (Exception ex)
+            {
+                LogHelper.Instance.LogException(ex);
+            }
+            return false;
+        }
+
+        public async Task<bool> DownloadVideosForPlaylist(PlaylistModel playlist, IProgressService progressService)
+        {
+            try
+            {
+                var tot = playlist.Videos.Count(w => w.SaveStatus < SaveStatus.Finished);
+                progressService.ConfigurePercentageProgress(tot);
+                await DownloadVideosForPlaylistWorker(playlist, progressService);
+
+                await _settingsRepository.SaveCache();
+
+                progressService.HidePercentageProgress();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.Instance.LogException(ex);
+            }
+            return false;
+        }
+
         private void BacklinkList()
         {
             foreach (var playlistModel in _playlists)
@@ -78,7 +154,7 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Repositories
             }
         }
 
-        public async Task<bool> RefreshPlaylists(IProgressService progressService)
+        public async Task<bool> RefreshAllPlaylists(IProgressService progressService)
         {
             try
             {
@@ -107,15 +183,23 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Repositories
 
                     foreach (var rawPlaylist in rawPlaylists)
                     {
+                        PlaylistModel playlist;
                         if (_playlists.All(l => l.Id != rawPlaylist.Id))
                         {
-                            var model = new PlaylistModel()
+                            playlist = new PlaylistModel()
                             {
                                 Id = rawPlaylist.Id,
                                 Name = rawPlaylist.Snippet.Title,
                             };
-                            InsertInOrder(model);
+                            InsertInOrder(playlist);
                         }
+                        else
+                        {
+                            playlist = _playlists.FirstOrDefault(l => l.Id == rawPlaylist.Id);
+                        }
+
+                        playlist.ProgressServie = new ProgressService();
+                        await RefreshPlaylist(playlist, playlist.ProgressServie);
                     }
                     return true;
                 }
@@ -127,38 +211,52 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Repositories
             return false;
         }
 
-        public async Task<bool> DownloadVideos(IProgressService progressService)
+        public async Task<bool> DownloadVideosForAllPlaylists(IProgressService progressService)
         {
             try
             {
-                var tot = _playlists.Sum(l => l.Videos.Count(w => w.SaveStatus < SaveStatus.Finished));
+                var tot = _playlists.Where(p => p.Refresh).Sum(l => l.Videos.Count(w => w.SaveStatus < SaveStatus.Finished));
                 progressService.ConfigurePercentageProgress(tot);
                 foreach (var playlist in _playlists.Where(p => p.Refresh))
                 {
-                    var vids = await GetVideos(playlist);
-                    foreach (var videoModel in vids)
-                    {
-                        if (videoModel.SaveStatus < SaveStatus.Finished)
-                        {
-                            videoModel.ProgressServie = new ProgressService();
-                            var stream = await DownloadHelper.DownloadYoutubeVideo(videoModel, videoModel.ProgressServie);
-                            if (stream != null &&
-                                await _mp3Respository.CreateFile(videoModel, stream) &&
-                                await _smartRepository.FillAutomaticProperties(videoModel.Mp3Model))
-                            {
-                                videoModel.SaveStatus = SaveStatus.Finished;
-
-                                await _mp3Respository.SaveFile(videoModel.Mp3Model);
-                            }
-                        }
-
-                        progressService.IncrementPercentageProgress();
-                    }
+                    await DownloadVideosForPlaylistWorker(playlist, progressService);
                 }
 
-                //todo: save cache
+                await _settingsRepository.SaveCache();
+
                 progressService.HidePercentageProgress();
                 return true;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.Instance.LogException(ex);
+            }
+            return false;
+        }
+
+        private async Task<bool> DownloadVideosForPlaylistWorker(PlaylistModel playlist,
+            IProgressService progressService)
+        {
+            try
+            {
+                foreach (var videoModel in playlist.Videos)
+                {
+                    if (videoModel.SaveStatus < SaveStatus.Finished)
+                    {
+                        videoModel.ProgressServie = new ProgressService();
+                        var stream = await DownloadHelper.DownloadYoutubeVideo(videoModel, videoModel.ProgressServie);
+                        if (stream != null &&
+                            await _videoRespository.CreateToMusicLibrary(videoModel, stream) &&
+                            await _smartRepository.FillAutomaticProperties(videoModel.Mp3Model))
+                        {
+                            videoModel.SaveStatus = SaveStatus.Finished;
+
+                            await _videoRespository.SaveToMusicLibrary(videoModel);
+                        }
+                    }
+
+                    progressService.IncrementPercentageProgress();
+                }
             }
             catch (Exception ex)
             {
@@ -200,46 +298,6 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Repositories
             return null;
         }
 
-        private async Task<List<VideoModel>> GetVideos(PlaylistModel playlist)
-        {
-            try
-            {
-                var youtubeService = await GetService();
-
-                if (youtubeService != null)
-                {
-                    //Get 5000 videos from a uploads playlist
-                    var plistItemsListRequestBuilder = new PlaylistItemsListRequestBuilder(youtubeService, "snippet, contentDetails")
-                    {
-                        PlaylistId = playlist.Id
-                    };
-                    var playlistItemsRequestService =
-                        new YoutubeListRequestService
-                            <PlaylistItemsResource.ListRequest, PlaylistItemListResponse, PlaylistItem>
-                            (plistItemsListRequestBuilder);
-
-                    var obj = await playlistItemsRequestService.ExecuteConcurrentAsync(new PageTokenRequestRange(5000));
-
-                    var res = new List<VideoModel>();
-                    foreach (var playlistItem in obj)
-                    {
-                        var model = new VideoModel()
-                        {
-                            Id = playlistItem.ContentDetails.VideoId,
-                            Name = playlistItem.Snippet.Title
-                        };
-                        res.Add(model);
-                    }
-                    return res;
-                }
-            }
-            catch (Exception ex)
-            {
-                LogHelper.Instance.LogException(ex);
-            }
-            return new List<VideoModel>();
-        }
-
         public async Task<bool> AddNewPlaylistByLink(string link)
         {
             try
@@ -272,6 +330,87 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Repositories
                 LogHelper.Instance.LogException(ex);
             }
             return false;
+        }
+
+        public ObservableCollection<PlaylistModel> GetDesignCollection()
+        {
+            return new ObservableCollection<PlaylistModel>()
+            {
+                GetExamplePlaylist(true),
+                GetExamplePlaylist(true),
+                GetExamplePlaylist(true),
+                GetExamplePlaylist(true),
+                GetExamplePlaylist(false),
+                GetExamplePlaylist(false),
+                GetExamplePlaylist(true),
+                GetExamplePlaylist(true),
+                GetExamplePlaylist(true),
+            };
+        }
+
+        private PlaylistModel GetExamplePlaylist(bool refresh = true)
+        {
+            var playlist = new PlaylistModel()
+            {
+                Name = "Music playlist",
+                Id = "ajdkga8rldhs7",
+                Refresh = refresh,
+                Videos = new ObservableCollection<VideoModel>()
+                {
+                    GetExampleVideo(SaveStatus.Discovered),
+                    GetExampleVideo(SaveStatus.DownloadPending),
+                    GetExampleVideo(SaveStatus.Downloading),
+                    GetExampleVideo(SaveStatus.Downloaded),
+                    GetExampleVideo(SaveStatus.Converting),
+                    GetExampleVideo(SaveStatus.Converted),
+                    GetExampleVideo(SaveStatus.FillingAutomaticProperties),
+                    GetExampleVideo(SaveStatus.FilledAutomaticProperties),
+                    GetExampleVideo(SaveStatus.Saving),
+                    GetExampleVideo(SaveStatus.Saved),
+                    GetExampleVideo(SaveStatus.Finished),
+                    GetExampleVideo(SaveStatus.Finished),
+                    GetExampleVideo(SaveStatus.Finished),
+                    GetExampleVideo(SaveStatus.FailedDownloadOrConversion)
+                }
+            };
+            foreach (var videoModel in playlist.Videos)
+            {
+                videoModel.PlaylistModel = playlist;
+            }
+            return playlist;
+        }
+
+        private VideoModel GetExampleVideo(SaveStatus status = SaveStatus.Finished)
+        {
+            var vm = new VideoModel()
+            {
+                Id = "hja7wdjka7ef8af6asdf6",
+                Mp3Model = GetExampleMp3(),
+                Name = "Video name - Alle farben (" + status + ")",
+                SaveStatus = status
+            };
+            vm.Mp3Model.VideoModel = vm;
+            if (vm.SaveStatus < SaveStatus.Finished)
+            {
+                vm.ProgressServie = new ProgressService();
+                vm.ProgressServie.ConfigurePercentageProgress(100, 20);
+            }
+            return vm;
+        }
+
+        private Mp3Model GetExampleMp3()
+        {
+            var mp3 = new Mp3Model()
+            {
+                Album = "Album alle Farben",
+                AlbumArtist = "Artists für Album",
+                Artist = "Artists für President",
+                Genre = "Genre des Dinos",
+                Title = "Grösser Titer",
+                Year = 2014,
+                FilePath = "8213ää123ö12ü713äa/Artist - Song.mp3"
+            };
+            return mp3;
         }
     }
 }

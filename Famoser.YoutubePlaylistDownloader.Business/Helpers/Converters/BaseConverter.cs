@@ -10,12 +10,12 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Helpers.Converters
 
         public abstract TModel Convert(TCache model);
         
-        public ObservableCollection<TModel> Convert(IEnumerable<TCache> models)
+        public ObservableCollection<TModel> Convert(IList<TCache> models)
         {
             return new ObservableCollection<TModel>(models.Select(Convert).ToList());
         }
 
-        public List<TCache> Convert(IEnumerable<TModel> models)
+        public List<TCache> Convert(IList<TModel> models)
         {
             return models.Select(Convert).ToList();
         }

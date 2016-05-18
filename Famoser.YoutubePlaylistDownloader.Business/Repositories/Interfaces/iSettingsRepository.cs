@@ -7,6 +7,6 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Repositories.Interfaces
     {
         Task<ConfigurationModel> GetConfiguration();
         Task<CacheModel> GetCache();
-        Task<bool> SaveCache(CacheModel cache);
+        Task<bool> SaveCache();
     }
 }
