@@ -30,7 +30,7 @@
 
             <ScrollViewer Grid.Row="1">
                 <StackPanel>
-                    <Image MaxHeight="300" Stretch="UniformToFill" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0" Source="{Binding SelectedVideo.Mp3Model.AlbumCover, Converter={StaticResource ByteToBitmapConverter}}" />
+                    <Image MaxHeight="300" Stretch="Uniform" HorizontalAlignment="Center" Source="{Binding SelectedVideo.Mp3Model.AlbumCover, Converter={StaticResource ByteToBitmapConverter}}" />
                     <Button Margin="10,10" Content="set image" Click="ButtonBase_OnClick" />
                     <TextBlock Text="Title" Style="{StaticResource FlatTextBoxDescription}" />
                     <TextBox Text="{Binding SelectedVideo.Mp3Model.Title, Mode=TwoWay}" Style="{ThemeResource FlatTextBox}" />
@@ -64,10 +64,7 @@
                             <TextBlock Text="{Binding SelectedVideo.Mp3Model.FileInfo.SaveProgramVersion}" Style="{StaticResource SecondaryTexBlock}" />
                         </StackPanel>
                     </Grid>
-                    
-                    
                 </StackPanel>
-
             </ScrollViewer>
         </Grid>
     </Grid>
