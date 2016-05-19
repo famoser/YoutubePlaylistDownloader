@@ -23,14 +23,9 @@
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="40" />
+                        <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
                     <TextBlock VerticalAlignment="Center" Style="{ThemeResource SecondaryBigTexBlock}" Grid.Column="0" Text="{Binding Name}" />
-                    <Button Grid.Column="1" Visibility="{Binding Mp3Model, Converter={StaticResource ReferenceToVisibilityConverter}}" Style="{StaticResource FlatButton}" Command="{Binding PlaylistViewModel.SelectVideoCommand, Source={StaticResource Locator}}" CommandParameter="{Binding }">
-                        <Button.Content>
-                            <SymbolIcon Symbol="Forward" />
-                        </Button.Content>
-                    </Button>
                 </Grid>
                 <Grid Grid.Row="1" Padding="10,0,10,20" Visibility="{Binding SaveStatus, Converter={StaticResource SaveStatusVisibilityConverter}}">
                     <Grid.RowDefinitions>
@@ -51,7 +46,7 @@
         </Grid.RowDefinitions>
         <TextBlock Grid.Row="0" Text="{Binding SelectedPlaylist.Name}" Style="{StaticResource BigTexBlock}" />
         <ProgressBar Grid.Row="0" Visibility="{Binding SelectedPlaylist.ProgressService.AnyProgressActive, Converter={StaticResource BoolToVisbilityConverter}}" Value="{Binding SelectedPlaylist.ProgressService.PercentageProgressActiveValue, Mode=TwoWay}" VerticalAlignment="Top" Maximum="{Binding SelectedPlaylist.ProgressService.PercentageProgressMaxValue}" Minimum="0" IsIndeterminate="{Binding SelectedPlaylist.ProgressService.IndeterminateProgressActive}"/>
-        <ListView Grid.Row="1" ItemContainerStyle="{ThemeResource StretchListViewItemStyle}" ItemsSource="{Binding SelectedPlaylist.Videos}" ItemTemplate="{StaticResource VideoDataTemplate}" />
+        <ListView IsItemClickEnabled="True" ItemClick="ListViewBase_OnItemClick" SelectionMode="None" Grid.Row="1" ItemContainerStyle="{ThemeResource StretchListViewItemStyle}" ItemsSource="{Binding SelectedPlaylist.Videos}" ItemTemplate="{StaticResource VideoDataTemplate}" />
     </Grid>
 
     <Page.BottomAppBar>

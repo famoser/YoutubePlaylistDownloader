@@ -12,6 +12,8 @@ using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
+using Famoser.YoutubePlaylistDownloader.Business.Models;
+using Famoser.YoutubePlaylistDownloader.View.ViewModels;
 
 // The Blank Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=234238
 
@@ -26,5 +28,15 @@ namespace Famoser.YoutubePlaylistDownloader.Presentation.UniversalWindows.Pages
         {
             this.InitializeComponent();
         }
+
+
+        public PlaylistViewModel PlaylistViewModel { get { return DataContext as PlaylistViewModel; } }
+
+        private void ListViewBase_OnItemClick(object sender, ItemClickEventArgs e)
+        {
+            var video = e.ClickedItem as VideoModel;
+            if (video != null)
+                if (PlaylistViewModel.SelectVideoCommand.CanExecute(video))
+                    PlaylistViewModel.SelectVideoCommand.Execute(video);        }
     }
 }
