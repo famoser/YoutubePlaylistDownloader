@@ -25,6 +25,7 @@ namespace Famoser.YoutubePlaylistDownloader.View.ViewModels
             _videoRespository = videoRespository;
 
             _saveFile = new RelayCommand(SaveFile, () => CanExecuteSaveFileCommand);
+            _addNewPicture = new RelayCommand<byte[]>(AddNewPicture, CanExecuteAddNewPictureCommand);
 
             Messenger.Default.Register<VideoModel>(this, Messages.Select, EvaluateSelectMessage);
 
@@ -42,14 +43,14 @@ namespace Famoser.YoutubePlaylistDownloader.View.ViewModels
 
         private readonly RelayCommand _saveFile;
         public ICommand SaveFileCommand => _saveFile;
-
-        public bool CanExecuteSaveFileCommand => SelectedVideo != null && !_saveFileActive;
+        private bool CanExecuteSaveFileCommand => SelectedVideo != null && !_saveFileActive;
 
         private bool _saveFileActive;
         public async void SaveFile()
         {
             _saveFileActive = true;
             _saveFile.RaiseCanExecuteChanged();
+            _addNewPicture.RaiseCanExecuteChanged();
 
             //todo: check status of file
             SelectedVideo.ProgressService = new ProgressService();
@@ -57,6 +58,30 @@ namespace Famoser.YoutubePlaylistDownloader.View.ViewModels
 
             _saveFileActive = false;
             _saveFile.RaiseCanExecuteChanged();
+            _addNewPicture.RaiseCanExecuteChanged();
+        }
+
+        private readonly RelayCommand<byte[]> _addNewPicture;
+        public ICommand AddNewPictureCommand => _addNewPicture;
+
+        private bool CanExecuteAddNewPictureCommand(byte[] bytes)
+        {
+            return !_saveFileActive && bytes != null && bytes.Length > 0;
+        }
+        
+        public async void AddNewPicture(byte[] bytes)
+        {
+            _saveFileActive = true;
+            _saveFile.RaiseCanExecuteChanged();
+            _addNewPicture.RaiseCanExecuteChanged();
+
+            //todo: check status of file
+            SelectedVideo.ProgressService = new ProgressService();
+            await _videoRespository.SaveToMusicLibrary(SelectedVideo);
+
+            _saveFileActive = false;
+            _saveFile.RaiseCanExecuteChanged();
+            _addNewPicture.RaiseCanExecuteChanged();
         }
 
         private VideoModel _selectedVideo;

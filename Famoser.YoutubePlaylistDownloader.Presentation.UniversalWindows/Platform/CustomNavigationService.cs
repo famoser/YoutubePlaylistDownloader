@@ -4,12 +4,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Windows.UI.Core;
+using Famoser.FrameworkEssentials.Singleton;
 using GalaSoft.MvvmLight.Views;
 
 namespace Famoser.YoutubePlaylistDownloader.Presentation.UniversalWindows.Platform
 {
 
-    public class CustomNavigationService : INavigationService
+    public class CustomNavigationService : SingletonBase<CustomNavigationService>, INavigationService
     {
         private int _backStack;
         private readonly NavigationService _realNavigationService;

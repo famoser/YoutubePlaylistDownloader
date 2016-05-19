@@ -12,8 +12,8 @@ using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
-using Famoser.YoutubePlaylistDownloader.Presentation.UniversalWindows.Enum;
-using Famoser.YoutubePlaylistDownloader.Presentation.UniversalWindows.Platform;
+using Famoser.YoutubePlaylistDownloader.Business.Helpers;
+using Famoser.YoutubePlaylistDownloader.View.ViewModels;
 
 // The Blank Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=234238
 
@@ -22,16 +22,21 @@ namespace Famoser.YoutubePlaylistDownloader.Presentation.UniversalWindows.Pages
     /// <summary>
     /// An empty page that can be used on its own or navigated to within a Frame.
     /// </summary>
-    public sealed partial class VideoPage : Page
+    public sealed partial class ChooseImagePage : Page
     {
-        public VideoPage()
+        public ChooseImagePage()
         {
             this.InitializeComponent();
         }
 
-        private void ButtonBase_OnClick(object sender, RoutedEventArgs e)
+        public VideoViewModel VideoViewModel => DataContext as VideoViewModel;
+
+        private async void SetFromUri_OnClick(object sender, RoutedEventArgs e)
         {
-            CustomNavigationService.Instance.NavigateTo(LocalPages.ChooseImagePage.ToString());
+            Uri uri = new Uri(UriTextBox.Text);
+            var bytes = await DownloadHelper.DownloadBytes(uri);
+            if (VideoViewModel.AddNewPictureCommand.CanExecute(bytes))
+                VideoViewModel.AddNewPictureCommand.Execute(bytes);
         }
     }
 }

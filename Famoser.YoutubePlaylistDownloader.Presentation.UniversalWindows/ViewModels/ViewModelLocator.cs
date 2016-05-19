@@ -1,4 +1,5 @@
 ﻿using Famoser.YoutubePlaylistDownloader.Business.Services.Interfaces;
+using Famoser.YoutubePlaylistDownloader.Presentation.UniversalWindows.Enum;
 using Famoser.YoutubePlaylistDownloader.Presentation.UniversalWindows.Pages;
 using Famoser.YoutubePlaylistDownloader.Presentation.UniversalWindows.Platform;
 using Famoser.YoutubePlaylistDownloader.View.Enums;
@@ -23,10 +24,11 @@ namespace Famoser.YoutubePlaylistDownloader.Presentation.UniversalWindows.ViewMo
 
         private INavigationService GetNavigationService()
         {
-            var navigationService = new CustomNavigationService();
+            var navigationService = CustomNavigationService.Instance;
             navigationService.Implementation.Configure(PageKeys.Mainpage.ToString(), typeof(MainPage));
             navigationService.Implementation.Configure(PageKeys.Video.ToString(), typeof(VideoPage));
             navigationService.Implementation.Configure(PageKeys.Playlist.ToString(), typeof(PlaylistPage));
+            navigationService.Implementation.Configure(LocalPages.ChooseImagePage.ToString(), typeof(ChooseImagePage));
             return navigationService;
         }
     }

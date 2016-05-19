@@ -111,6 +111,10 @@
     <Compile Include="Converters\SaveStatusConverter.cs" />
     <Compile Include="Converters\SaveStatusVisible.cs" />
     <Compile Include="Converters\TimeSpanConverter.cs" />
+    <Compile Include="Enum\LocalPages.cs" />
+    <Compile Include="Pages\ChooseImagePage.xaml.cs">
+      <DependentUpon>ChooseImagePage.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Pages\MainPage.xaml.cs">
       <DependentUpon>MainPage.xaml</DependentUpon>
     </Compile>
@@ -151,6 +155,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Page Include="Pages\ChooseImagePage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Pages\MainPage.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
