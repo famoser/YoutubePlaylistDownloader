@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using Famoser.FrameworkEssentials.Logging;
 using Famoser.FrameworkEssentials.Services;
 using Famoser.FrameworkEssentials.Services.Interfaces;
 using Famoser.YoutubePlaylistDownloader.Business.Models;
@@ -48,17 +49,27 @@ namespace Famoser.YoutubePlaylistDownloader.View.ViewModels
         private bool _saveFileActive;
         public async void SaveFile()
         {
-            _saveFileActive = true;
-            _saveFile.RaiseCanExecuteChanged();
-            _addNewPicture.RaiseCanExecuteChanged();
+            ChangeIsFileActive(true);
 
             //todo: check status of file
             SelectedVideo.ProgressService = new ProgressService();
             await _videoRespository.SaveToMusicLibrary(SelectedVideo);
 
-            _saveFileActive = false;
-            _saveFile.RaiseCanExecuteChanged();
-            _addNewPicture.RaiseCanExecuteChanged();
+            ChangeIsFileActive(false);
+        }
+
+        private void ChangeIsFileActive(bool newStatus)
+        {
+            _saveFileActive = newStatus;
+            try
+            {
+                _saveFile.RaiseCanExecuteChanged();
+                _addNewPicture.RaiseCanExecuteChanged();
+            }
+            catch
+            {
+                // ignored
+            }
         }
 
         private readonly RelayCommand<byte[]> _addNewPicture;
@@ -69,19 +80,13 @@ namespace Famoser.YoutubePlaylistDownloader.View.ViewModels
             return !_saveFileActive && bytes != null && bytes.Length > 0;
         }
         
-        public async void AddNewPicture(byte[] bytes)
+        public void AddNewPicture(byte[] bytes)
         {
-            _saveFileActive = true;
-            _saveFile.RaiseCanExecuteChanged();
-            _addNewPicture.RaiseCanExecuteChanged();
+            ChangeIsFileActive(true);
+            
+            SelectedVideo.Mp3Model.AlbumCover = bytes;
 
-            //todo: check status of file
-            SelectedVideo.ProgressService = new ProgressService();
-            await _videoRespository.SaveToMusicLibrary(SelectedVideo);
-
-            _saveFileActive = false;
-            _saveFile.RaiseCanExecuteChanged();
-            _addNewPicture.RaiseCanExecuteChanged();
+            ChangeIsFileActive(false);
         }
 
         private VideoModel _selectedVideo;

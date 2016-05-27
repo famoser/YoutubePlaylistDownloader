@@ -108,6 +108,7 @@
     </Compile>
     <Compile Include="Converters\ByteToBitmapConverter.cs" />
     <Compile Include="Converters\DateTimeConverter.cs" />
+    <Compile Include="Converters\ProgressVisibilityServiceConverter.cs" />
     <Compile Include="Converters\SaveStatusConverter.cs" />
     <Compile Include="Converters\SaveStatusVisible.cs" />
     <Compile Include="Converters\TimeSpanConverter.cs" />

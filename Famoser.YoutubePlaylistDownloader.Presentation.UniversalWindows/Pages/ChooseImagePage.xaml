@@ -21,10 +21,27 @@
         <TextBlock Grid.Row="0" Text="{Binding SelectedVideo.Name}" Style="{StaticResource BigTexBlock}" />
         <ProgressBar Grid.Row="0" Visibility="{Binding SelectedVideo.ProgressService.AnyProgressActive, Converter={StaticResource BoolToVisbilityConverter}}" Value="{Binding SelectedVideo.ProgressService.PercentageProgressActiveValue, Mode=TwoWay}" VerticalAlignment="Top" Maximum="{Binding SelectedPlaylist.ProgressService.PercentageProgressMaxValue}" Minimum="0" IsIndeterminate="{Binding SelectedVideo.ProgressService.IndeterminateProgressActive}"/>
         <StackPanel Grid.Row="1">
-            <Image MaxHeight="300" Stretch="UniformToFill" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0" Source="{Binding SelectedVideo.Mp3Model.AlbumCover, Converter={StaticResource ByteToBitmapConverter}}" />
-            <TextBlock Text="Uri" Style="{StaticResource FlatTextBoxDescription}" />
+            <Image MaxHeight="300" Stretch="Uniform" HorizontalAlignment="Center" Source="{Binding SelectedVideo.Mp3Model.AlbumCover, Converter={StaticResource ByteToBitmapConverter}}" />
+            <TextBlock Text="url" Style="{StaticResource FlatTextBoxDescription}" />
             <TextBox x:Name="UriTextBox" Style="{ThemeResource FlatTextBox}" />
-            <Button Click="SetFromUri_OnClick" IsEnabled="{Binding AddNewPictureCommand}" />
+            <Button Margin="10,0" Click="SetFromUri_OnClick" Content="Set from url" IsEnabled="{Binding AddNewPictureCommand}" />
+            <Grid Margin="10,30">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="10" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Button Click="SetFromClipboard_OnClick" HorizontalAlignment="Stretch" Content="set from clipboard" IsEnabled="{Binding AddNewPictureCommand}" />
+                <Button Click="ChooseFile_OnClick" Grid.Column="2" HorizontalAlignment="Stretch" Content="choose file" IsEnabled="{Binding AddNewPictureCommand}" />
+            </Grid>
         </StackPanel>
     </Grid>
+    
+    <Page.BottomAppBar>
+        <CommandBar>
+            <CommandBar.PrimaryCommands>
+                <AppBarButton Icon="Save" Command="{Binding SaveFileCommand}" />
+            </CommandBar.PrimaryCommands>
+        </CommandBar>
+    </Page.BottomAppBar>
 </Page>

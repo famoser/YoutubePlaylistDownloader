@@ -5,12 +5,17 @@
     xmlns:local="using:Famoser.YoutubePlaylistDownloader.Presentation.UniversalWindows.UserControls.ProgressModel"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:converters="using:Famoser.YoutubePlaylistDownloader.Presentation.UniversalWindows.Converters"
     mc:Ignorable="d"
     d:DesignHeight="300"
     d:DesignWidth="400"
     >
+    
+    <UserControl.Resources>
+        <converters:ProgressVisibilityServiceConverter x:Key="ProgressVisibilityServiceConverter" />
+    </UserControl.Resources>
 
-    <Grid>
-        <ProgressBar Visibility="{Binding ProgressService.AnyProgressActive, Converter={StaticResource BoolToVisbilityConverter}}" Value="{Binding ProgressService.PercentageProgressActiveValue, Mode=TwoWay}" VerticalAlignment="Top" Maximum="{Binding ProgressService.PercentageProgressMaxValue}" Minimum="0" IsIndeterminate="{Binding ProgressService.IndeterminateProgressActive}"/>
+    <Grid Visibility="{Binding ProgressService, Converter={StaticResource ProgressVisibilityServiceConverter}}">
+        <ProgressBar Value="{Binding ProgressService.PercentageProgressActiveValue, Mode=TwoWay}" VerticalAlignment="Top" Maximum="{Binding ProgressService.PercentageProgressMaxValue}" Minimum="0" IsIndeterminate="{Binding ProgressService.IndeterminateProgressActive}"/>
     </Grid>
 </UserControl>
