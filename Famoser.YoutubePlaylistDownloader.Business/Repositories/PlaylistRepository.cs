@@ -106,6 +106,7 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Repositories
                                 PlaylistModel = playlist
                             };
                         }
+                        video.TrackNumberInPlaylist = index + 1;
                         if (playlist.Videos.Count < index)
                             playlist.Videos.Insert(index, video);
                         else
@@ -164,11 +165,13 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Repositories
         {
             foreach (var playlistModel in _playlists)
             {
-                foreach (var videoModel in playlistModel.Videos)
+                for (int index = 0; index < playlistModel.Videos.Count; index++)
                 {
+                    var videoModel = playlistModel.Videos[index];
                     if (videoModel.Mp3Model != null)
                         videoModel.Mp3Model.VideoModel = videoModel;
                     videoModel.PlaylistModel = playlistModel;
+                    videoModel.TrackNumberInPlaylist = index + 1;
                 }
             }
         }
@@ -283,6 +286,8 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Repositories
                             await _videoRespository.CreateToMusicLibrary(videoModel, stream) &&
                             await _smartRepository.FillAutomaticProperties(videoModel.Mp3Model))
                         {
+                            videoModel.Mp3Model.Track = (uint)videoModel.TrackNumberInPlaylist;
+                            videoModel.Mp3Model.TrackCount = (uint) playlist.Videos.Count;
                             videoModel.SaveStatus = SaveStatus.Finished;
 
                             await _videoRespository.SaveToMusicLibrary(videoModel);

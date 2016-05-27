@@ -44,6 +44,10 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Repositories
                 model.AlbumArtist = string.Join(", ", tagFile.Tag.AlbumArtists);
                 model.Genre = string.Join(", ", tagFile.Tag.Genres);
                 model.Year = tagFile.Tag.Year;
+
+                model.Track = tagFile.Tag.Track;
+                model.TrackCount = tagFile.Tag.TrackCount;
+
                 model.FileInfo = new Mp3FileInfo
                 {
                     Duration = tagFile.Properties.Duration,
@@ -99,10 +103,11 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Repositories
                 tagFile.Tag.Genres = model.Genre.Split(new[] { ", " }, StringSplitOptions.RemoveEmptyEntries);
                 tagFile.Tag.Year = model.Year;
 
-                //todo
-                //tagFile.Tag.Disc = 1;
-                //tagFile.Tag.DiscCount = 1;
-                //tagFile.Tag.Track
+                //automatic
+                tagFile.Tag.Disc = 1;
+                tagFile.Tag.DiscCount = 1;
+                tagFile.Tag.Track = model.Track;
+                tagFile.Tag.TrackCount = model.TrackCount;
 
                 //save image
                 if (model.AlbumCover != null && model.AlbumCover.Length > 0)
