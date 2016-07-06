@@ -2,6 +2,7 @@
 using Famoser.FrameworkEssentials.Services;
 using Famoser.FrameworkEssentials.Services.Interfaces;
 using Famoser.FrameworkEssentials.View.Commands;
+using Famoser.YoutubePlaylistDownloader.Business.Enums;
 using Famoser.YoutubePlaylistDownloader.Business.Models;
 using Famoser.YoutubePlaylistDownloader.Business.Repositories.Interfaces;
 using Famoser.YoutubePlaylistDownloader.View.Enums;
@@ -46,11 +47,10 @@ namespace Famoser.YoutubePlaylistDownloader.View.ViewModels
         private bool _saveFileActive;
         public async void SaveFile()
         {
-            using (new IndeterminateProgressDisposable<IndeterminateProgressKey>(_saveFile, b => _saveFileActive = b, IndeterminateProgressKey.SavingFile, _progressService))
+            using (new IndeterminateProgressDisposable<IndeterminateProgressKeys, object>(_saveFile, b => _saveFileActive = b, IndeterminateProgressKeys.SavingFile, _progressService))
             {
                 _addNewPicture.RaiseCanExecuteChanged();
-
-                SelectedVideo.ProgressService = new ProgressService();
+                
                 await _videoRespository.SaveToMusicLibrary(SelectedVideo);
             }
             _addNewPicture.RaiseCanExecuteChanged();
@@ -66,7 +66,7 @@ namespace Famoser.YoutubePlaylistDownloader.View.ViewModels
 
         public void AddNewPicture(byte[] bytes)
         {
-            using (new IndeterminateProgressDisposable<IndeterminateProgressKey>(_saveFile, b => _saveFileActive = b, IndeterminateProgressKey.AddingNewPicture, _progressService))
+            using (new IndeterminateProgressDisposable<IndeterminateProgressKeys, object>(_saveFile, b => _saveFileActive = b, IndeterminateProgressKeys.AddingNewPicture, _progressService))
             {
                 _addNewPicture.RaiseCanExecuteChanged();
                 SelectedVideo.Mp3Model.AlbumCover = bytes;

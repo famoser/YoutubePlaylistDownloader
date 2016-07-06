@@ -8,10 +8,10 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Repositories.Interfaces
     public interface IPlaylistRepository
     {
         ObservableCollection<PlaylistModel> GetPlaylists();
-        Task<bool> RefreshPlaylist(PlaylistModel playlist, IProgressService progressService);
-        Task<bool> DownloadVideosForPlaylist(PlaylistModel playlist, IProgressService progressService);
-        Task<bool> RefreshAllPlaylists(IProgressService progressService);
-        Task<bool> DownloadVideosForAllPlaylists(IProgressService progressService);
+        Task<bool> RefreshPlaylist(PlaylistModel playlist);
+        Task<bool> DownloadVideosForPlaylist(PlaylistModel playlist);
+        Task<bool> RefreshAllPlaylists();
+        Task<bool> DownloadVideosForAllPlaylists();
         Task<bool> AddNewPlaylistByLink(string link);
     }
 }

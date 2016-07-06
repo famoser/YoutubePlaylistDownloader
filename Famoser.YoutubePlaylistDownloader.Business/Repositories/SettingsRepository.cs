@@ -1,7 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
-using Famoser.FrameworkEssentials.Logging;
-using Famoser.FrameworkEssentials.Services.Base;
+﻿using System.Threading.Tasks;
 using Famoser.YoutubePlaylistDownloader.Business.Enums;
 using Famoser.YoutubePlaylistDownloader.Business.Helpers.Converters;
 using Famoser.YoutubePlaylistDownloader.Business.Models.Save;

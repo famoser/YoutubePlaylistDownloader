@@ -2,6 +2,7 @@
 using Famoser.FrameworkEssentials.Services;
 using Famoser.FrameworkEssentials.Services.Interfaces;
 using Famoser.FrameworkEssentials.View.Commands;
+using Famoser.YoutubePlaylistDownloader.Business.Enums;
 using Famoser.YoutubePlaylistDownloader.Business.Models;
 using Famoser.YoutubePlaylistDownloader.Business.Repositories.Interfaces;
 using Famoser.YoutubePlaylistDownloader.View.Enums;
@@ -51,10 +52,9 @@ namespace Famoser.YoutubePlaylistDownloader.View.ViewModels
         private bool _refreshPlaylistActive;
         public async void RefreshPlaylist()
         {
-            using (new IndeterminateProgressDisposable<IndeterminateProgressKey>(_refreshPlaylist, b => _refreshPlaylistActive = b, IndeterminateProgressKey.RefreshingPlaylists, _progressService))
+            using (new IndeterminateProgressDisposable<IndeterminateProgressKeys, object>(_refreshPlaylist, b => _refreshPlaylistActive = b, IndeterminateProgressKeys.RefreshingPlaylists, _progressService))
             {
-                SelectedPlaylist.ProgressService = new ProgressService();
-                await _playlistRepository.RefreshPlaylist(SelectedPlaylist, SelectedPlaylist.ProgressService);
+                await _playlistRepository.RefreshPlaylist(SelectedPlaylist);
             }
         }
 
@@ -66,10 +66,9 @@ namespace Famoser.YoutubePlaylistDownloader.View.ViewModels
         private bool _startDownloadActive;
         public async void StartDownload()
         {
-            using (new IndeterminateProgressDisposable<IndeterminateProgressKey>(_startDownload, b => _startDownloadActive = b, IndeterminateProgressKey.StartingDownload, _progressService))
+            using (new IndeterminateProgressDisposable<IndeterminateProgressKeys, object>(_startDownload, b => _startDownloadActive = b, IndeterminateProgressKeys.StartingDownload, _progressService))
             {
-                SelectedPlaylist.ProgressService = new ProgressService();
-                await _playlistRepository.DownloadVideosForPlaylist(SelectedPlaylist, SelectedPlaylist.ProgressService);
+                await _playlistRepository.DownloadVideosForPlaylist(SelectedPlaylist);
             }
         }
 
@@ -86,11 +85,7 @@ namespace Famoser.YoutubePlaylistDownloader.View.ViewModels
         public PlaylistModel SelectedPlaylist
         {
             get { return _selectedPlaylist; }
-            set
-            {
-                if (Set(ref _selectedPlaylist, value))
-                    _playlistRepository.DownloadVideosForPlaylist(_selectedPlaylist, _progressService);
-            }
+            set { Set(ref _selectedPlaylist, value); }
         }
     }
 }

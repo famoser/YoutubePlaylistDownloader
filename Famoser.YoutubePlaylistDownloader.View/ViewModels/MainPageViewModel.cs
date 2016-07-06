@@ -4,6 +4,7 @@ using System.Windows.Input;
 using Famoser.FrameworkEssentials.Services;
 using Famoser.FrameworkEssentials.Services.Interfaces;
 using Famoser.FrameworkEssentials.View.Commands;
+using Famoser.YoutubePlaylistDownloader.Business.Enums;
 using Famoser.YoutubePlaylistDownloader.Business.Models;
 using Famoser.YoutubePlaylistDownloader.Business.Repositories.Interfaces;
 using Famoser.YoutubePlaylistDownloader.View.Enums;
@@ -42,15 +43,15 @@ namespace Famoser.YoutubePlaylistDownloader.View.ViewModels
         private readonly RelayCommand _refreshPlaylists;
         public ICommand RefreshPlaylistsCommand => _refreshPlaylists;
 
-        private bool CanExecuteRefreshPlaylistsCommand => !_prozessActive;
+        private bool CanExecuteRefreshPlaylistsCommand => !_isRefreshing;
 
         public async void RefreshPlaylist()
         {
-            using (new IndeterminateProgressDisposable<IndeterminateProgressKey>(_refreshPlaylists, b => _prozessActive = b, IndeterminateProgressKey.RefreshingPlaylists, _progressService))
+            using (new IndeterminateProgressDisposable<IndeterminateProgressKeys, object>(_refreshPlaylists, b => _isRefreshing = b, IndeterminateProgressKeys.RefreshingPlaylists, _progressService))
             {
                 _startDownload.RaiseCanExecuteChanged();
 
-                await _playlistRepository.RefreshAllPlaylists(_progressService);
+                await _playlistRepository.RefreshAllPlaylists();
             }
             _startDownload.RaiseCanExecuteChanged();
         }
@@ -58,16 +59,16 @@ namespace Famoser.YoutubePlaylistDownloader.View.ViewModels
         private readonly RelayCommand _startDownload;
         public ICommand StartDownloadCommand => _startDownload;
 
-        private bool CanExecuteStartDownloadCommand => Playlists != null && Playlists.Any() && !_prozessActive;
+        private bool CanExecuteStartDownloadCommand => Playlists != null && Playlists.Any() && !_isRefreshing;
 
-        private bool _prozessActive;
+        private bool _isRefreshing;
         public async void StartDownload()
         {
-            using (new IndeterminateProgressDisposable<IndeterminateProgressKey>(_startDownload, b => _prozessActive = b, IndeterminateProgressKey.StartingDownload, _progressService))
+            using (new IndeterminateProgressDisposable<IndeterminateProgressKeys, object>(_startDownload, b => _isRefreshing = b, IndeterminateProgressKeys.StartingDownload, _progressService))
             {
                 _refreshPlaylists.RaiseCanExecuteChanged();
 
-                await _playlistRepository.DownloadVideosForAllPlaylists(_progressService);
+                await _playlistRepository.DownloadVideosForAllPlaylists();
             }
             _refreshPlaylists.RaiseCanExecuteChanged();
         }
@@ -92,7 +93,7 @@ namespace Famoser.YoutubePlaylistDownloader.View.ViewModels
         private bool _isAddingPlaylist;
         public async void AddToPlaylist()
         {
-            using (new IndeterminateProgressDisposable<IndeterminateProgressKey>(_addToPlaylistsCommand, b => _isAddingPlaylist = b, IndeterminateProgressKey.AddingToPlaylist, _progressService))
+            using (new IndeterminateProgressDisposable<IndeterminateProgressKeys, object>(_addToPlaylistsCommand, b => _isAddingPlaylist = b, IndeterminateProgressKeys.AddingToPlaylist, _progressService))
             {
                 await _playlistRepository.AddNewPlaylistByLink(PlaylistLink);
                 PlaylistLink = null;
@@ -107,16 +108,7 @@ namespace Famoser.YoutubePlaylistDownloader.View.ViewModels
             _historyNavigationService.NavigateTo(PageKeys.Playlist.ToString());
             Messenger.Default.Send(model, Messages.Select);
         }
-
-        private ObservableCollection<PlaylistModel> _playlists;
-        public ObservableCollection<PlaylistModel> Playlists
-        {
-            get { return _playlists; }
-            set
-            {
-                if (Set(ref _playlists, value))
-                    _startDownload.RaiseCanExecuteChanged();
-            }
-        }
+        
+        public ObservableCollection<PlaylistModel> Playlists { get; }
     }
 }

@@ -29,26 +29,27 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Repositories.Mock
             };
         }
 
-        public async Task<bool> RefreshPlaylist(PlaylistModel playlist, IProgressService progressService)
+        public async Task<bool> RefreshPlaylist(PlaylistModel playlist)
+        {
+
+            return true;
+        }
+
+        public async Task<bool> DownloadVideosForPlaylist(PlaylistModel playlist)
         {
             return true;
         }
 
-        public async Task<bool> DownloadVideosForPlaylist(PlaylistModel playlist, IProgressService progressService)
+        public async Task<bool> RefreshAllPlaylists()
         {
             return true;
         }
 
-        public async Task<bool> RefreshAllPlaylists(IProgressService progressService)
+        public async Task<bool> DownloadVideosForAllPlaylists()
         {
             return true;
         }
-
-        public async Task<bool> DownloadVideosForAllPlaylists(IProgressService progressService)
-        {
-            return true;
-        }
-
+        
         public async Task<bool> AddNewPlaylistByLink(string link)
         {
             return true;
@@ -99,7 +100,6 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Repositories.Mock
             vm.Mp3Model.VideoModel = vm;
             if (vm.SaveStatus < SaveStatus.Finished)
             {
-                vm.ProgressService = new ProgressService();
                 vm.ProgressService.ConfigurePercentageProgress(100, 20);
             }
             return vm;

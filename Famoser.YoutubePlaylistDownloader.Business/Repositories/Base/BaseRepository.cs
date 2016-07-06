@@ -1,14 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Famoser.FrameworkEssentials.Logging;
 
 namespace Famoser.YoutubePlaylistDownloader.Business.Repositories.Base
 {
     public class BaseRepository
     {
+        protected const int MaxThreads = 5;
         protected T Execute<T>(Func<T> func)
         {
             try

@@ -4,6 +4,12 @@
     {
         RefreshPlaylist,
         RefreshPlaylists,
-        GatheringPlaylists
+        GatheringPlaylists,
+
+        RefreshingPlaylists,
+        StartingDownload,
+        SavingFile,
+        AddingNewPicture,
+        AddingToPlaylist
     }
 }

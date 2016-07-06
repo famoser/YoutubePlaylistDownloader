@@ -1,11 +1,11 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using Famoser.FrameworkEssentials.Logging;
 using Famoser.FrameworkEssentials.Services;
-using Famoser.FrameworkEssentials.Services.Base;
 using Famoser.FrameworkEssentials.Services.Interfaces;
 using Famoser.YoutubeDataApiWrapper.Portable.RequestBuilders;
 using Famoser.YoutubeDataApiWrapper.Portable.RequestServices;
@@ -14,7 +14,6 @@ using Famoser.YoutubePlaylistDownloader.Business.Enums;
 using Famoser.YoutubePlaylistDownloader.Business.Helpers;
 using Famoser.YoutubePlaylistDownloader.Business.Helpers.Converters;
 using Famoser.YoutubePlaylistDownloader.Business.Models;
-using Famoser.YoutubePlaylistDownloader.Business.Models.Data;
 using Famoser.YoutubePlaylistDownloader.Business.Repositories.Base;
 using Famoser.YoutubePlaylistDownloader.Business.Repositories.Interfaces;
 using Famoser.YoutubePlaylistDownloader.Business.Services.Interfaces;
@@ -89,96 +88,93 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Repositories
             }
         }
 
-        private Task<bool> RefreshPlaylistWorker(PlaylistModel playlist, IProgressService progressService)
+        private Task<bool> RefreshPlaylistWorker(ConcurrentStack<PlaylistModel> playlists)
         {
             return Execute(async () =>
             {
-                progressService.StartIndeterminateProgress(IndeterminateProgressKeys.RefreshPlaylist);
-                var youtubeService = await GetService();
-
-                if (youtubeService != null)
+                PlaylistModel model;
+                while (playlists.TryPop(out model))
                 {
-                    var plistItemsListRequestBuilder = new PlaylistItemsListRequestBuilder(youtubeService,
-                        "snippet, contentDetails")
+                    model.ProgressService.StartIndeterminateProgress(IndeterminateProgressKeys.RefreshPlaylist);
+                    var youtubeService = await GetService();
+
+                    if (youtubeService != null)
                     {
-                        PlaylistId = playlist.Id
-                    };
-                    var playlistItemsRequestService =
-                        new YoutubeListRequestService
-                            <PlaylistItemsResource.ListRequest, PlaylistItemListResponse, PlaylistItem>
-                            (plistItemsListRequestBuilder);
-
-                    var obj =
-                        (await playlistItemsRequestService.ExecuteConcurrentAsync(new PageTokenRequestRange(5000)))
-                            .ToList();
-
-                    for (int index = 0; index < obj.Count; index++)
-                    {
-                        var playlistItem = obj.ToList()[index];
-                        var video = playlist.Videos.FirstOrDefault(v => v.Id == playlistItem.ContentDetails.VideoId);
-
-                        if (video != null)
+                        var plistItemsListRequestBuilder = new PlaylistItemsListRequestBuilder(youtubeService,
+                            "snippet, contentDetails")
                         {
-                            playlist.Videos.Remove(video);
-                            video.Name = playlistItem.Snippet.Title;
-                        }
-                        else
+                            PlaylistId = model.Id
+                        };
+                        var playlistItemsRequestService =
+                            new YoutubeListRequestService
+                                <PlaylistItemsResource.ListRequest, PlaylistItemListResponse, PlaylistItem>
+                                (plistItemsListRequestBuilder);
+
+                        var obj =
+                            (await playlistItemsRequestService.ExecuteConcurrentAsync(new PageTokenRequestRange(5000)))
+                                .ToList();
+
+                        for (int index = 0; index < obj.Count; index++)
                         {
-                            video = new VideoModel
+                            var playlistItem = obj.ToList()[index];
+                            var video = model.Videos.FirstOrDefault(v => v.Id == playlistItem.ContentDetails.VideoId);
+
+                            if (video != null)
                             {
-                                Id = playlistItem.ContentDetails.VideoId,
-                                Name = playlistItem.Snippet.Title,
-                                PlaylistModel = playlist
-                            };
+                                model.Videos.Remove(video);
+                                video.Name = playlistItem.Snippet.Title;
+                            }
+                            else
+                            {
+                                video = new VideoModel
+                                {
+                                    Id = playlistItem.ContentDetails.VideoId,
+                                    Name = playlistItem.Snippet.Title,
+                                    PlaylistModel = model
+                                };
+                            }
+                            if (model.Videos.Count < index)
+                                model.Videos.Insert(index, video);
+                            else
+                                model.Videos.Add(video);
                         }
-                        if (playlist.Videos.Count < index)
-                            playlist.Videos.Insert(index, video);
-                        else
-                            playlist.Videos.Add(video);
+
+                        model.ProgressService.StopIndeterminateProgress(IndeterminateProgressKeys.RefreshPlaylist);
                     }
-
-                    progressService.StopIndeterminateProgress(IndeterminateProgressKeys.RefreshPlaylist);
-                    return true;
                 }
-                return false;
-            });
-        }
-
-
-        public async Task<bool> RefreshPlaylist(PlaylistModel playlist, IProgressService progressService)
-        {
-            await Initialize();
-            return await Execute(async () =>
-            {
-                playlist.ProgressService = new ProgressService();
-                if (await RefreshPlaylistWorker(playlist, playlist.ProgressService))
-                    return await _settingsRepository.SaveCache();
-                return false;
-            });
-        }
-
-        public async Task<bool> DownloadVideosForPlaylist(PlaylistModel playlist, IProgressService progressService)
-        {
-            await Initialize();
-            return await Execute(async () =>
-            {
-                var tot = playlist.Videos.Count(w => w.SaveStatus < SaveStatus.Finished);
-                progressService.ConfigurePercentageProgress(tot);
-
-                await DownloadVideosForPlaylistWorker(playlist, progressService);
-
-                await _settingsRepository.SaveCache();
-                progressService.HidePercentageProgress();
                 return true;
             });
         }
 
-        public async Task<bool> RefreshAllPlaylists(IProgressService progressService)
+
+        public async Task<bool> RefreshPlaylist(PlaylistModel playlist)
         {
             await Initialize();
             return await Execute(async () =>
             {
-                progressService.StartIndeterminateProgress(IndeterminateProgressKeys.GatheringPlaylists);
+                var res = await RefreshPlaylistWorker(new ConcurrentStack<PlaylistModel>(new List<PlaylistModel>() {playlist}));  
+                await _settingsRepository.SaveCache();
+
+                return res;
+            });
+        }
+
+        public async Task<bool> DownloadVideosForPlaylist(PlaylistModel playlist)
+        {
+            await Initialize();
+            return await Execute(async () =>
+            {
+                var res = await DownloadVideosForPlaylistWorker(new ConcurrentStack<PlaylistModel>(new List<PlaylistModel>() { playlist }));
+                await _settingsRepository.SaveCache();
+                return res;
+            });
+        }
+
+        public async Task<bool> RefreshAllPlaylists()
+        {
+            await Initialize();
+            return await Execute(async () =>
+            {
                 var youtubeService = await GetService();
 
                 if (youtubeService != null)
@@ -205,10 +201,9 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Repositories
                     var ids = new List<string>();
                     foreach (var rawPlaylist in rawPlaylists)
                     {
-                        PlaylistModel playlist;
                         if (_playlists.All(l => l.Id != rawPlaylist.Id))
                         {
-                            playlist = new PlaylistModel()
+                            var playlist = new PlaylistModel()
                             {
                                 Id = rawPlaylist.Id,
                                 Name = rawPlaylist.Snippet.Title,
@@ -223,66 +218,70 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Repositories
                     {
                         _playlists.Remove(playlistModel);
                     }
-
-                    progressService.StartIndeterminateProgress(IndeterminateProgressKeys.RefreshPlaylist);
-                    foreach (var playlistModel in _playlists.Where(p => p.Refresh))
+                    
+                    var playlists = new ConcurrentStack<PlaylistModel>();
+                    foreach (var source in _playlists.Where(p => p.Refresh))
                     {
-                        playlistModel.ProgressService = new ProgressService();
-                        await RefreshPlaylistWorker(playlistModel, playlistModel.ProgressService);
+                        playlists.Push(source);
                     }
-                    progressService.StopIndeterminateProgress(IndeterminateProgressKeys.RefreshPlaylists);
-
+                    var tasks = new List<Task>();
+                    for (int i = 0; i < MaxThreads; i++)
+                    {
+                        tasks.Add(RefreshPlaylistWorker(playlists));
+                    }
+                    await Task.WhenAll(tasks);
                     await _settingsRepository.SaveCache();
-
-                    progressService.StopIndeterminateProgress(IndeterminateProgressKeys.GatheringPlaylists);
+                    
                     return true;
                 }
                 return false;
             });
         }
 
-        public async Task<bool> DownloadVideosForAllPlaylists(IProgressService progressService)
+        public async Task<bool> DownloadVideosForAllPlaylists()
         {
             await Initialize();
             return await Execute(async () =>
             {
-                var tot = _playlists.Where(p => p.Refresh).Sum(l => l.Videos.Count(w => w.SaveStatus < SaveStatus.Finished));
-                progressService.ConfigurePercentageProgress(tot);
-                foreach (var playlist in _playlists.Where(p => p.Refresh))
+                var playlists = new ConcurrentStack<PlaylistModel>(_playlists.Where(p => p.Refresh));
+                var tasks = new List<Task>();
+                for (int i = 0; i < MaxThreads; i++)
                 {
-                    await DownloadVideosForPlaylistWorker(playlist, progressService);
+                    tasks.Add(DownloadVideosForPlaylistWorker(playlists));
                 }
-
+                await Task.WhenAll(tasks);
                 await _settingsRepository.SaveCache();
-
-                progressService.HidePercentageProgress();
                 return true;
             });
         }
 
-        private async Task<bool> DownloadVideosForPlaylistWorker(PlaylistModel playlist,
-            IProgressService progressService)
+        private async Task<bool> DownloadVideosForPlaylistWorker(ConcurrentStack<PlaylistModel> playlists)
         {
             await Initialize();
             return await Execute(async () =>
             {
-                foreach (var videoModel in playlist.Videos)
+                PlaylistModel model;
+                while (playlists.TryPop(out model))
                 {
-                    if (videoModel.SaveStatus < SaveStatus.Finished)
+                    model.ProgressService.ConfigurePercentageProgress(model.Videos.Count);
+                    foreach (var videoModel in model.Videos)
                     {
-                        videoModel.ProgressService = new ProgressService();
-                        var stream = await DownloadHelper.DownloadYoutubeVideo(videoModel, videoModel.ProgressService);
-                        if (stream != null &&
-                            await _videoRespository.CreateToMusicLibrary(videoModel, stream) &&
-                            await _smartRepository.FillAutomaticProperties(videoModel.Mp3Model))
+                        if (videoModel.SaveStatus < SaveStatus.Finished)
                         {
-                            videoModel.SaveStatus = SaveStatus.Finished;
+                            var stream = await DownloadHelper.DownloadYoutubeVideo(videoModel, videoModel.ProgressService);
+                            if (stream != null &&
+                                await _videoRespository.CreateToMusicLibrary(videoModel, stream) &&
+                                await _smartRepository.FillAutomaticProperties(videoModel.Mp3Model))
+                            {
+                                videoModel.SaveStatus = SaveStatus.Finished;
 
-                            await _videoRespository.SaveToMusicLibrary(videoModel);
+                                await _videoRespository.SaveToMusicLibrary(videoModel);
+                            }
                         }
-                    }
 
-                    progressService.IncrementPercentageProgress();
+                        model.ProgressService.IncrementPercentageProgress();
+                    }
+                    model.ProgressService.HidePercentageProgress();
                 }
                 return true;
             });

@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using Famoser.FrameworkEssentials.Services;
 
 namespace Famoser.YoutubePlaylistDownloader.Business.Models
 {
