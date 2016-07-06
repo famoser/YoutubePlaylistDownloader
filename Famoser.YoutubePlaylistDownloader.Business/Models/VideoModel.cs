@@ -20,6 +20,13 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Models
             set { Set(ref _saveStatus, value); }
         }
 
+        private int _trackNumberInPlaylist;
+        public int TrackNumberInPlaylist
+        {
+            get { return _trackNumberInPlaylist; }
+            set { Set(ref _trackNumberInPlaylist, value); }
+        }
+
         public PlaylistModel PlaylistModel { get; set; }
     }
 }

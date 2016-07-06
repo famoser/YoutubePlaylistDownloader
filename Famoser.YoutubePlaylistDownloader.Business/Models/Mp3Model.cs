@@ -49,6 +49,20 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Models
             get { return _year; }
             set { Set(ref _year, value); }
         }
+
+        private uint _track;
+        public uint Track
+        {
+            get { return _track; }
+            set { Set(ref _track, value); }
+        }
+
+        private uint _trackCount;
+        public uint TrackCount
+        {
+            get { return _trackCount; }
+            set { Set(ref _trackCount, value); }
+        }
         #endregion
 
         private byte[] _albumCover;
