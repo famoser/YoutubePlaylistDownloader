@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows.Input;
 using Famoser.FrameworkEssentials.Services;
@@ -10,7 +9,6 @@ using Famoser.YoutubePlaylistDownloader.View.Enums;
 using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Command;
 using GalaSoft.MvvmLight.Messaging;
-using GalaSoft.MvvmLight.Views;
 
 namespace Famoser.YoutubePlaylistDownloader.View.ViewModels
 {

@@ -9,6 +9,7 @@ using Famoser.YoutubePlaylistDownloader.Business.Enums;
 using Famoser.YoutubePlaylistDownloader.Business.Helpers;
 using Famoser.YoutubePlaylistDownloader.Business.Models;
 using Famoser.YoutubePlaylistDownloader.Business.Models.Data;
+using Famoser.YoutubePlaylistDownloader.Business.Repositories.Base;
 using Famoser.YoutubePlaylistDownloader.Business.Repositories.Interfaces;
 using Famoser.YoutubePlaylistDownloader.Business.Services.Interfaces;
 using Newtonsoft.Json;
@@ -17,19 +18,18 @@ using TagLib.Id3v2;
 
 namespace Famoser.YoutubePlaylistDownloader.Business.Repositories
 {
-    public class VideoRepository : BaseService, IVideoRespository
+    public class VideoRepository : BaseRepository, IVideoRespository
     {
         private readonly IFolderStorageService _folderStorageService;
         private readonly ISettingsRepository _settingsRepository;
         private static readonly FolderType Type = FolderType.Music;
         private static readonly string SubFolder = "youtube";
 
-        public VideoRepository(IFolderStorageService folderStorageService, ISettingsRepository settingsRepository) : base(true, LogHelper.Instance)
+        public VideoRepository(IFolderStorageService folderStorageService, ISettingsRepository settingsRepository)
         {
             _folderStorageService = folderStorageService;
             _settingsRepository = settingsRepository;
         }
-
 
         public Task<bool> LoadFromMusicLibrary(VideoModel videoModel)
         {

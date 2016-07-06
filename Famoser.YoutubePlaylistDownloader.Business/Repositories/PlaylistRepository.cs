@@ -15,6 +15,7 @@ using Famoser.YoutubePlaylistDownloader.Business.Helpers;
 using Famoser.YoutubePlaylistDownloader.Business.Helpers.Converters;
 using Famoser.YoutubePlaylistDownloader.Business.Models;
 using Famoser.YoutubePlaylistDownloader.Business.Models.Data;
+using Famoser.YoutubePlaylistDownloader.Business.Repositories.Base;
 using Famoser.YoutubePlaylistDownloader.Business.Repositories.Interfaces;
 using Famoser.YoutubePlaylistDownloader.Business.Services.Interfaces;
 using Google.Apis.Auth.OAuth2;
@@ -25,14 +26,14 @@ using Nito.AsyncEx;
 
 namespace Famoser.YoutubePlaylistDownloader.Business.Repositories
 {
-    public class PlaylistRepository : BaseService, IPlaylistRepository
+    public class PlaylistRepository : BaseRepository, IPlaylistRepository
     {
         private readonly ISettingsRepository _settingsRepository;
         private readonly IVideoRespository _videoRespository;
         private readonly ISmartRepository _smartRepository;
         private readonly IPlatformService _platformService;
 
-        public PlaylistRepository(ISettingsRepository settingsRepository, IPlatformService platformService, IVideoRespository videoRespository, ISmartRepository smartRepository) : base(true, LogHelper.Instance)
+        public PlaylistRepository(ISettingsRepository settingsRepository, IPlatformService platformService, IVideoRespository videoRespository, ISmartRepository smartRepository)
         {
             _settingsRepository = settingsRepository;
             _platformService = platformService;

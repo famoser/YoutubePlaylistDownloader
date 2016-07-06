@@ -5,16 +5,17 @@ using Famoser.FrameworkEssentials.Services.Base;
 using Famoser.YoutubePlaylistDownloader.Business.Enums;
 using Famoser.YoutubePlaylistDownloader.Business.Helpers;
 using Famoser.YoutubePlaylistDownloader.Business.Models;
+using Famoser.YoutubePlaylistDownloader.Business.Repositories.Base;
 using Famoser.YoutubePlaylistDownloader.Business.Repositories.Interfaces;
 using IF.Lastfm.Core.Api;
 
 namespace Famoser.YoutubePlaylistDownloader.Business.Repositories
 {
-    public class SmartRepository : BaseService, ISmartRepository
+    public class SmartRepository : BaseRepository, ISmartRepository
     {
         private readonly ISettingsRepository _settingsRepository;
 
-        public SmartRepository(ISettingsRepository settingsRepository) : base(true, LogHelper.Instance)
+        public SmartRepository(ISettingsRepository settingsRepository)
         {
             _settingsRepository = settingsRepository;
         }
