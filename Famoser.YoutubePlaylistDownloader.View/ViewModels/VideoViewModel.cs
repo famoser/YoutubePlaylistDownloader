@@ -32,7 +32,7 @@ namespace Famoser.YoutubePlaylistDownloader.View.ViewModels
 
             if (IsInDesignMode)
             {
-                SelectedVideo = SimpleIoc.Default.GetInstance<IPlaylistRepository>().GetDesignCollection()[0].Videos[0];
+                SelectedVideo = SimpleIoc.Default.GetInstance<IPlaylistRepository>().GetPlaylists()[0].Videos[0];
             }
         }
 

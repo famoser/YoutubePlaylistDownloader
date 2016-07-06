@@ -1,4 +1,6 @@
-﻿using Famoser.YoutubePlaylistDownloader.Business.Services.Interfaces;
+﻿using Famoser.FrameworkEssentials.Services.Interfaces;
+using Famoser.FrameworkEssentials.UniversalWindows.Platform;
+using Famoser.YoutubePlaylistDownloader.Business.Services.Interfaces;
 using Famoser.YoutubePlaylistDownloader.Presentation.UniversalWindows.Enum;
 using Famoser.YoutubePlaylistDownloader.Presentation.UniversalWindows.Pages;
 using Famoser.YoutubePlaylistDownloader.Presentation.UniversalWindows.Platform;
@@ -22,13 +24,13 @@ namespace Famoser.YoutubePlaylistDownloader.Presentation.UniversalWindows.ViewMo
             SimpleIoc.Default.Register(() => ns);
         }
 
-        private INavigationService GetNavigationService()
+        private IHistoryNavigationService GetNavigationService()
         {
-            var navigationService = CustomNavigationService.Instance;
-            navigationService.Implementation.Configure(PageKeys.Mainpage.ToString(), typeof(MainPage));
-            navigationService.Implementation.Configure(PageKeys.Video.ToString(), typeof(VideoPage));
-            navigationService.Implementation.Configure(PageKeys.Playlist.ToString(), typeof(PlaylistPage));
-            navigationService.Implementation.Configure(LocalPages.ChooseImagePage.ToString(), typeof(ChooseImagePage));
+            var navigationService = new HistoryNavigationServices();
+            navigationService.Configure(PageKeys.Mainpage.ToString(), typeof(MainPage));
+            navigationService.Configure(PageKeys.Video.ToString(), typeof(VideoPage));
+            navigationService.Configure(PageKeys.Playlist.ToString(), typeof(PlaylistPage));
+            navigationService.Configure(LocalPages.ChooseImagePage.ToString(), typeof(ChooseImagePage));
             return navigationService;
         }
     }

@@ -12,8 +12,10 @@ using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
+using Famoser.FrameworkEssentials.Services.Interfaces;
 using Famoser.YoutubePlaylistDownloader.Presentation.UniversalWindows.Enum;
 using Famoser.YoutubePlaylistDownloader.Presentation.UniversalWindows.Platform;
+using GalaSoft.MvvmLight.Ioc;
 
 // The Blank Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=234238
 
@@ -31,7 +33,7 @@ namespace Famoser.YoutubePlaylistDownloader.Presentation.UniversalWindows.Pages
 
         private void ButtonBase_OnClick(object sender, RoutedEventArgs e)
         {
-            CustomNavigationService.Instance.NavigateTo(LocalPages.ChooseImagePage.ToString());
+            SimpleIoc.Default.GetInstance<IHistoryNavigationService>().NavigateTo(LocalPages.ChooseImagePage.ToString());
         }
     }
 }

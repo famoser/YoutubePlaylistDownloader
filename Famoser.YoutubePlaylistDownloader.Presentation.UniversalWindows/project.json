@@ -1,17 +1,18 @@
 ﻿{
   "dependencies": {
-    "Famoser.FrameworkEssentials": "2.0.1",
-    "Famoser.FrameworkEssentials.UniversalWindows": "1.0.1",
-    "Google.Apis.Auth": "1.13.0",
-    "Google.Apis.YouTube.v3": "1.13.0.481",
-    "Microsoft.ApplicationInsights": "2.0.1",
+    "Famoser.FrameworkEssentials": "2.6.3",
+    "Famoser.FrameworkEssentials.UniversalWindows": "1.1.2",
+    "Google.Apis.Auth": "1.14.0",
+    "Google.Apis.YouTube.v3": "1.14.0.529",
+    "Microsoft.ApplicationInsights": "2.1.0",
     "Microsoft.ApplicationInsights.PersistenceChannel": "1.2.3",
     "Microsoft.ApplicationInsights.WindowsApps": "1.1.1",
     "Microsoft.Bcl.Build": "1.0.21",
     "Microsoft.Net.Http": "2.2.29",
     "Microsoft.NETCore.UniversalWindowsPlatform": "5.1.0",
     "MvvmLight": "5.3.0",
-    "Newtonsoft.Json": "8.0.3",
+    "Newtonsoft.Json": "9.0.1",
+    "Nito.AsyncEx": "3.0.1",
     "TagLib.Portable": "1.0.4"
   },
   "frameworks": {

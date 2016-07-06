@@ -5,10 +5,10 @@ using System.Linq;
 using System.Threading.Tasks;
 using Windows.Storage;
 using Famoser.FrameworkEssentials.Logging;
+using Famoser.FrameworkEssentials.UniversalWindows.Platform;
 using Famoser.YoutubePlaylistDownloader.Business.Enums;
 using Famoser.YoutubePlaylistDownloader.Business.Helpers;
 using Famoser.YoutubePlaylistDownloader.Business.Services.Interfaces;
-using UniversalEssentials.Platform;
 using File = TagLib.File;
 
 namespace Famoser.YoutubePlaylistDownloader.Presentation.UniversalWindows.Platform

@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using Windows.Storage.Streams;
 using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Media.Imaging;
-using UniversalEssentials.Platform;
 
 namespace Famoser.YoutubePlaylistDownloader.Presentation.UniversalWindows.Converters
 {

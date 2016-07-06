@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using Famoser.FrameworkEssentials.Logging;
 using Famoser.FrameworkEssentials.Services;
 using Famoser.FrameworkEssentials.Services.Interfaces;
 using Famoser.YoutubePlaylistDownloader.Business.Models;
@@ -19,12 +20,12 @@ namespace Famoser.YoutubePlaylistDownloader.View.ViewModels
     public class PlaylistViewModel : ViewModelBase
     {
         private readonly IPlaylistRepository _playlistRepository;
-        private readonly INavigationService _navigationService;
+        private readonly IHistoryNavigationService _historyNavigationService;
 
-        public PlaylistViewModel(IPlaylistRepository playlistRepository, INavigationService navigationService)
+        public PlaylistViewModel(IPlaylistRepository playlistRepository, IHistoryNavigationService historyNavigationService)
         {
             _playlistRepository = playlistRepository;
-            _navigationService = navigationService;
+            _historyNavigationService = historyNavigationService;
 
             _startDownload = new RelayCommand(StartDownload, () => CanExecuteStartDownloadCommand);
             _refreshPlaylist = new RelayCommand(RefreshPlaylist, () => CanExecuteRefreshPlaylistCommand);
@@ -34,7 +35,7 @@ namespace Famoser.YoutubePlaylistDownloader.View.ViewModels
 
             if (IsInDesignMode)
             {
-                SelectedPlaylist = _playlistRepository.GetDesignCollection()[0];
+                SelectedPlaylist = _playlistRepository.GetPlaylists()[0];
             }
         }
 
@@ -88,7 +89,7 @@ namespace Famoser.YoutubePlaylistDownloader.View.ViewModels
 
         public void SelectVideo(VideoModel model)
         {
-            _navigationService.NavigateTo(PageKeys.Video.ToString());
+            _historyNavigationService.NavigateTo(PageKeys.Video.ToString());
             Messenger.Default.Send(model, Messages.Select);
         }
 

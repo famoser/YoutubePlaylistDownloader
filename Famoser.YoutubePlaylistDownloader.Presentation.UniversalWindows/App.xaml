@@ -4,14 +4,14 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:Famoser.YoutubePlaylistDownloader.Presentation.UniversalWindows"
     xmlns:viewModels="using:Famoser.YoutubePlaylistDownloader.Presentation.UniversalWindows.ViewModels"
-    xmlns:converters="using:UniversalEssentials.Converters.Visibility"
+    xmlns:visibility="using:Famoser.FrameworkEssentials.UniversalWindows.Converters.Visibility"
     RequestedTheme="Light">
     <Application.Resources>
         <ResourceDictionary>
             <viewModels:ViewModelLocator x:Key="Locator" />
 
-            <converters:BoolToVisbilityConverter x:Key="BoolToVisbilityConverter" />
-            <converters:ReferenceToVisibilityConverter x:Key="ReferenceToVisibilityConverter" /> 
+            <visibility:BoolToVisibilityConverter x:Key="BoolToVisbilityConverter" />
+            <visibility:ReferenceToVisibilityConverter x:Key="ReferenceToVisibilityConverter" /> 
 
 
             <Style x:Key="StretchListViewItemStyle" TargetType="ListViewItem">

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Famoser.FrameworkEssentials.Logging;
+using Famoser.FrameworkEssentials.Services.Base;
 using Famoser.YoutubePlaylistDownloader.Business.Enums;
 using Famoser.YoutubePlaylistDownloader.Business.Helpers;
 using Famoser.YoutubePlaylistDownloader.Business.Models;
@@ -9,11 +10,11 @@ using IF.Lastfm.Core.Api;
 
 namespace Famoser.YoutubePlaylistDownloader.Business.Repositories
 {
-    public class SmartRepository : ISmartRepository
+    public class SmartRepository : BaseService, ISmartRepository
     {
         private readonly ISettingsRepository _settingsRepository;
 
-        public SmartRepository(ISettingsRepository settingsRepository)
+        public SmartRepository(ISettingsRepository settingsRepository) : base(true, LogHelper.Instance)
         {
             _settingsRepository = settingsRepository;
         }
@@ -33,10 +34,10 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Repositories
             model.Album = "yout: " + model.VideoModel.PlaylistModel.Name;
             model.Genre = model.VideoModel.PlaylistModel.Name;
         }
-        
-        private async Task<Uri> GetAlbumCoverUri(Mp3Model model)
+
+        private Task<Uri> GetAlbumCoverUri(Mp3Model model)
         {
-            try
+            return Execute(async () =>
             {
                 var config = await _settingsRepository.GetConfiguration();
                 var client = new LastfmClient(config.FmApiKey, config.FmApiSecred);
@@ -46,7 +47,8 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Repositories
                     var trackResponse = await client.Track.GetInfoAsync(model.Title, model.Artist);
                     if (trackResponse.Success)
                     {
-                        if ((model.Album == model.Artist || model.Album == null) && trackResponse.Content.AlbumName != null)
+                        if ((model.Album == model.Artist || model.Album == null) &&
+                            trackResponse.Content.AlbumName != null)
                         {
                             model.Album = trackResponse.Content.AlbumName;
                         }
@@ -66,17 +68,13 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Repositories
                         return response.Content.Images?.Large;
                     }
                 }
-            }
-            catch (Exception ex)
-            {
-                LogHelper.Instance.LogException(ex);
-            }
-            return null;
+                return null;
+            });
         }
 
-        public async Task<bool> FillAutomaticProperties(Mp3Model model)
+        public Task<bool> FillAutomaticProperties(Mp3Model model)
         {
-            try
+            return Execute(async () =>
             {
                 model.VideoModel.SaveStatus = SaveStatus.FillingAutomaticProperties;
                 AssignMetaTags(model);
@@ -88,13 +86,7 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Repositories
 
                 model.VideoModel.SaveStatus = SaveStatus.FilledAutomaticProperties;
                 return true;
-            }
-            catch (Exception ex)
-            {
-                LogHelper.Instance.LogException(ex);
-                model.VideoModel.SaveStatus = SaveStatus.FailedFillingAutomaticProperties;
-            }
-            return false;
+            });
         }
     }
 }

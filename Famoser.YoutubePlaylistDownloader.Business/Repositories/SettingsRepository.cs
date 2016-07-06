@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Famoser.FrameworkEssentials.Logging;
+using Famoser.FrameworkEssentials.Services.Base;
 using Famoser.YoutubePlaylistDownloader.Business.Enums;
 using Famoser.YoutubePlaylistDownloader.Business.Helpers.Converters;
 using Famoser.YoutubePlaylistDownloader.Business.Models.Save;
@@ -11,21 +12,21 @@ using Newtonsoft.Json;
 
 namespace Famoser.YoutubePlaylistDownloader.Business.Repositories
 {
-    public class SettingsRepository : ISettingsRepository
+    public class SettingsRepository : BaseService, ISettingsRepository
     {
         private ConfigurationModel _config;
         private CacheModel _cache;
         private readonly IFolderStorageService _folderStorageService;
 
-        public SettingsRepository(IFolderStorageService folderStorageService)
+        public SettingsRepository(IFolderStorageService folderStorageService) : base(true, LogHelper.Instance)
         {
             _folderStorageService = folderStorageService;
         }
 
         private bool _isInitialized = false;
-        private async Task Initialize()
+        private Task Initialize()
         {
-            try
+            return Execute(async () =>
             {
                 if (!_isInitialized)
                 {
@@ -38,11 +39,7 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Repositories
                         : new ConfigurationModel();
                 }
                 _isInitialized = true;
-            }
-            catch (Exception ex)
-            {
-                LogHelper.Instance.LogException(ex);
-            }
+            });
         }
 
         public async Task<ConfigurationModel> GetConfiguration()
@@ -57,16 +54,19 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Repositories
             return _cache;
         }
 
-        public async Task<bool> SaveCache()
+        public Task<bool> SaveCache()
         {
-            var converter = new PlaylistConverter();
-            var cache = new CacheModel()
+            return Execute(async () =>
             {
-                CachedPlaylists = converter.Convert(await SimpleIoc.Default.GetInstance<IPlaylistRepository>().GetPlaylists())
-            };
+                var converter = new PlaylistConverter();
+                var cache = new CacheModel()
+                {
+                    CachedPlaylists = converter.Convert(SimpleIoc.Default.GetInstance<IPlaylistRepository>().GetPlaylists())
+                };
 
-            return await _folderStorageService.SetCachedTextFileAsync(FileKeys.CacheFile.ToString(),
-                JsonConvert.SerializeObject(cache));
+                return await _folderStorageService.SetCachedTextFileAsync(FileKeys.CacheFile.ToString(),
+                    JsonConvert.SerializeObject(cache));
+            });
         }
     }
 }

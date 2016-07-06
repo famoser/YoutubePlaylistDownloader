@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Famoser.FrameworkEssentials.Logging;
+using Famoser.FrameworkEssentials.Services.Base;
 using Famoser.YoutubePlaylistDownloader.Business.Enums;
 using Famoser.YoutubePlaylistDownloader.Business.Helpers;
 using Famoser.YoutubePlaylistDownloader.Business.Models;
@@ -16,23 +17,23 @@ using TagLib.Id3v2;
 
 namespace Famoser.YoutubePlaylistDownloader.Business.Repositories
 {
-    public class VideoRepository : IVideoRespository
+    public class VideoRepository : BaseService, IVideoRespository
     {
         private readonly IFolderStorageService _folderStorageService;
         private readonly ISettingsRepository _settingsRepository;
         private static readonly FolderType Type = FolderType.Music;
         private static readonly string SubFolder = "youtube";
 
-        public VideoRepository(IFolderStorageService folderStorageService, ISettingsRepository settingsRepository)
+        public VideoRepository(IFolderStorageService folderStorageService, ISettingsRepository settingsRepository) : base(true, LogHelper.Instance)
         {
             _folderStorageService = folderStorageService;
             _settingsRepository = settingsRepository;
         }
 
 
-        public async Task<bool> LoadFromMusicLibrary(VideoModel videoModel)
+        public Task<bool> LoadFromMusicLibrary(VideoModel videoModel)
         {
-            try
+            return Execute(async () =>
             {
                 var model = videoModel.Mp3Model;
                 var file = await _folderStorageService.GetTagLibFile(Type, model.FilePath);
@@ -57,7 +58,8 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Repositories
                     try
                     {
                         PrivateFrame mp3Json = PrivateFrame.Get(id3Tag as TagLib.Id3v2.Tag, "ypdjson", false);
-                        var json = Encoding.Unicode.GetString(mp3Json.PrivateData.Data, 0, mp3Json.PrivateData.Data.Length);
+                        var json = Encoding.Unicode.GetString(mp3Json.PrivateData.Data, 0,
+                            mp3Json.PrivateData.Data.Length);
                         var metaData = JsonConvert.DeserializeObject<Mp3FileMetaData>(json);
                         model.FileInfo.SaveDate = metaData.SaveDate;
                         model.FileInfo.SaveProgramVersion = metaData.SaveProgramVersion;
@@ -75,17 +77,12 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Repositories
                     model.AlbumCover = pic.Data.Data;
 
                 return true;
-            }
-            catch (Exception ex)
-            {
-                LogHelper.Instance.LogException(ex);
-            }
-            return false;
+            });
         }
 
-        public async Task<bool> SaveToMusicLibrary(VideoModel videoModel)
+        public Task<bool> SaveToMusicLibrary(VideoModel videoModel)
         {
-            try
+            return Execute(async () =>
             {
                 var model = videoModel.Mp3Model;
                 var file = await _folderStorageService.GetTagLibFile(Type, model.FilePath);
@@ -121,7 +118,8 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Repositories
                 if (id3Tag is TagLib.Id3v2.Tag)
                 {
                     PrivateFrame mp3Json = PrivateFrame.Get(id3Tag as TagLib.Id3v2.Tag, "ypdjson", true);
-                    mp3Json.PrivateData = Encoding.Unicode.GetBytes(JsonConvert.SerializeObject(Mp3Helper.GetMp3FileMetaData(model)));
+                    mp3Json.PrivateData =
+                        Encoding.Unicode.GetBytes(JsonConvert.SerializeObject(Mp3Helper.GetMp3FileMetaData(model)));
                 }
 
                 tagFile.Save();
@@ -135,17 +133,12 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Repositories
                     await _settingsRepository.SaveCache();
                 }
                 return true;
-            }
-            catch (Exception ex)
-            {
-                LogHelper.Instance.LogException(ex);
-            }
-            return false;
+            });
         }
 
-        public async Task<bool> CreateToMusicLibrary(VideoModel video, Stream fileStream)
+        public Task<bool> CreateToMusicLibrary(VideoModel video, Stream fileStream)
         {
-            try
+            return Execute(async () =>
             {
                 video.SaveStatus = SaveStatus.Saving;
 
@@ -164,13 +157,8 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Repositories
                     video.SaveStatus = SaveStatus.Saved;
                     return true;
                 }
-            }
-            catch (Exception ex)
-            {
-                LogHelper.Instance.LogException(ex);
-                video.SaveStatus = SaveStatus.FailedSaving;
-            }
-            return false;
+                return false;
+            });
         }
 
         private string GetRecommendedFilePath(Mp3Model model)

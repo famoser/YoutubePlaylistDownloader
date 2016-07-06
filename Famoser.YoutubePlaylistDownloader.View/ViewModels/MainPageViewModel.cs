@@ -19,32 +19,23 @@ namespace Famoser.YoutubePlaylistDownloader.View.ViewModels
         private readonly IPlaylistRepository _playlistRepository;
         private readonly IProgressService _progressService;
 
-        private readonly INavigationService _navigationService;
+        private readonly IHistoryNavigationService _historyNavigationService;
 
-        public MainPageViewModel(IPlaylistRepository playlistRepository, IProgressService progressService, INavigationService navigationService)
+        public MainPageViewModel(IPlaylistRepository playlistRepository, IProgressService progressService, IHistoryNavigationService historyNavigationService)
         {
             _playlistRepository = playlistRepository;
             _progressService = progressService;
-            _navigationService = navigationService;
+            _historyNavigationService = historyNavigationService;
 
             _refreshPlaylists = new RelayCommand(RefreshPlaylist, () => CanExecuteRefreshPlaylistsCommand);
             _startDownload = new RelayCommand(StartDownload, () => CanExecuteStartDownloadCommand);
             _addToPlaylistsCommand = new RelayCommand(AddToPlaylist, () => CanExecuteAddToPlaylistCommand);
             _selectPlaylist = new RelayCommand<PlaylistModel>(SelectPlaylist);
 
-            if (IsInDesignMode)
-            {
-                Playlists = _playlistRepository.GetDesignCollection();
-            }
-            else
-            {
-                Initialize();
-            }
-        }
+            Playlists = _playlistRepository.GetPlaylists();
 
-        private async void Initialize()
-        {
-            Playlists = await _playlistRepository.GetPlaylists();
+            if (!IsInDesignMode)
+                RefreshPlaylist();
         }
 
         public ProgressService ProgressService => _progressService as ProgressService;
@@ -53,7 +44,7 @@ namespace Famoser.YoutubePlaylistDownloader.View.ViewModels
         public ICommand RefreshPlaylistsCommand => _refreshPlaylists;
 
         private bool CanExecuteRefreshPlaylistsCommand => !_prozessActive;
-        
+
         public async void RefreshPlaylist()
         {
             _prozessActive = true;
@@ -119,7 +110,7 @@ namespace Famoser.YoutubePlaylistDownloader.View.ViewModels
 
         public void SelectPlaylist(PlaylistModel model)
         {
-            _navigationService.NavigateTo(PageKeys.Playlist.ToString());
+            _historyNavigationService.NavigateTo(PageKeys.Playlist.ToString());
             Messenger.Default.Send(model, Messages.Select);
         }
 
