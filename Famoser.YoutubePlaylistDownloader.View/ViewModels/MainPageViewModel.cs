@@ -3,6 +3,7 @@ using System.Linq;
 using System.Windows.Input;
 using Famoser.FrameworkEssentials.Services;
 using Famoser.FrameworkEssentials.Services.Interfaces;
+using Famoser.FrameworkEssentials.View.Commands;
 using Famoser.YoutubePlaylistDownloader.Business.Models;
 using Famoser.YoutubePlaylistDownloader.Business.Repositories.Interfaces;
 using Famoser.YoutubePlaylistDownloader.View.Enums;
@@ -45,14 +46,12 @@ namespace Famoser.YoutubePlaylistDownloader.View.ViewModels
 
         public async void RefreshPlaylist()
         {
-            _prozessActive = true;
-            _refreshPlaylists.RaiseCanExecuteChanged();
-            _startDownload.RaiseCanExecuteChanged();
+            using (new IndeterminateProgressDisposable<IndeterminateProgressKey>(_refreshPlaylists, b => _prozessActive = b, IndeterminateProgressKey.RefreshingPlaylists, _progressService))
+            {
+                _startDownload.RaiseCanExecuteChanged();
 
-            await _playlistRepository.RefreshAllPlaylists(_progressService);
-
-            _prozessActive = false;
-            _refreshPlaylists.RaiseCanExecuteChanged();
+                await _playlistRepository.RefreshAllPlaylists(_progressService);
+            }
             _startDownload.RaiseCanExecuteChanged();
         }
 
@@ -64,13 +63,10 @@ namespace Famoser.YoutubePlaylistDownloader.View.ViewModels
         private bool _prozessActive;
         public async void StartDownload()
         {
-            _prozessActive = true;
-            _startDownload.RaiseCanExecuteChanged();
-
-            await _playlistRepository.DownloadVideosForAllPlaylists(_progressService);
-
-            _prozessActive = false;
-            _startDownload.RaiseCanExecuteChanged();
+            using (new IndeterminateProgressDisposable<IndeterminateProgressKey>(_refreshPlaylists, b => _prozessActive = b, IndeterminateProgressKey.StartingDownload, _progressService))
+            {
+                await _playlistRepository.DownloadVideosForAllPlaylists(_progressService);
+            }
         }
 
 
@@ -93,14 +89,11 @@ namespace Famoser.YoutubePlaylistDownloader.View.ViewModels
         private bool _isAddingPlaylist;
         public async void AddToPlaylist()
         {
-            _isAddingPlaylist = true;
-            _addToPlaylistsCommand.RaiseCanExecuteChanged();
-
-            await _playlistRepository.AddNewPlaylistByLink(PlaylistLink);
-            PlaylistLink = null;
-
-            _isAddingPlaylist = false;
-            _addToPlaylistsCommand.RaiseCanExecuteChanged();
+            using (new IndeterminateProgressDisposable<IndeterminateProgressKey>(_addToPlaylistsCommand, b => _isAddingPlaylist = b, IndeterminateProgressKey.AddingToPlaylist, _progressService))
+            {
+                await _playlistRepository.AddNewPlaylistByLink(PlaylistLink);
+                PlaylistLink = null;
+            }
         }
 
         private readonly RelayCommand<PlaylistModel> _selectPlaylist;

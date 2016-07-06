@@ -60,6 +60,8 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Repositories
                     if (_isInitialized)
                         return;
 
+                    _isInitialized = true;
+
                     var cache = await _settingsRepository.GetCache();
                     if (cache != null)
                     {
@@ -70,8 +72,6 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Repositories
                         }
                     }
                     BacklinkList();
-
-                    _isInitialized = true;
                 }
             });
         }

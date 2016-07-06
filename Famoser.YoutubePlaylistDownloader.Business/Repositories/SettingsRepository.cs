@@ -35,16 +35,15 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Repositories
                 {
                     if (_isInitialized)
                         return;
-                    
-                    var json = await _folderStorageService.GetCachedTextFileAsync(FileKeys.CacheFile.ToString());
-                    _cache = json != null ? JsonConvert.DeserializeObject<CacheModel>(json) : new CacheModel();
-
-                    json = await _folderStorageService.GetUserTextFileAsync(FileKeys.ConfigurationFile.ToString());
-                    _config = json != null
-                        ? JsonConvert.DeserializeObject<ConfigurationModel>(json)
-                        : new ConfigurationModel();
 
                     _isInitialized = true;
+
+                    var json = await Execute(async () => await _folderStorageService.GetCachedTextFileAsync(FileKeys.CacheFile.ToString()));
+                    _cache = json != null ? JsonConvert.DeserializeObject<CacheModel>(json) : new CacheModel();
+                    await SaveCache();
+
+                    json = await Execute(async () => await _folderStorageService.GetUserTextFileAsync(FileKeys.ConfigurationFile.ToString()));
+                    _config = json != null ? JsonConvert.DeserializeObject<ConfigurationModel>(json) : new ConfigurationModel();
                 }
             });
         }
@@ -52,13 +51,13 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Repositories
         public async Task<ConfigurationModel> GetConfiguration()
         {
             await Initialize();
-            return _config;
+            return _config ?? new ConfigurationModel();
         }
 
         public async Task<CacheModel> GetCache()
         {
             await Initialize();
-            return _cache;
+            return _cache ?? new CacheModel();
         }
 
         public Task<bool> SaveCache()

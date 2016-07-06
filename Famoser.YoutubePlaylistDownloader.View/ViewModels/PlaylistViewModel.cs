@@ -1,6 +1,7 @@
 ﻿using System.Windows.Input;
 using Famoser.FrameworkEssentials.Services;
 using Famoser.FrameworkEssentials.Services.Interfaces;
+using Famoser.FrameworkEssentials.View.Commands;
 using Famoser.YoutubePlaylistDownloader.Business.Models;
 using Famoser.YoutubePlaylistDownloader.Business.Repositories.Interfaces;
 using Famoser.YoutubePlaylistDownloader.View.Enums;
@@ -14,11 +15,13 @@ namespace Famoser.YoutubePlaylistDownloader.View.ViewModels
     {
         private readonly IPlaylistRepository _playlistRepository;
         private readonly IHistoryNavigationService _historyNavigationService;
+        private readonly IProgressService _progressService;
 
-        public PlaylistViewModel(IPlaylistRepository playlistRepository, IHistoryNavigationService historyNavigationService)
+        public PlaylistViewModel(IPlaylistRepository playlistRepository, IHistoryNavigationService historyNavigationService, IProgressService progressService)
         {
             _playlistRepository = playlistRepository;
             _historyNavigationService = historyNavigationService;
+            _progressService = progressService;
 
             _startDownload = new RelayCommand(StartDownload, () => CanExecuteStartDownloadCommand);
             _refreshPlaylist = new RelayCommand(RefreshPlaylist, () => CanExecuteRefreshPlaylistCommand);
@@ -48,15 +51,11 @@ namespace Famoser.YoutubePlaylistDownloader.View.ViewModels
         private bool _refreshPlaylistActive;
         public async void RefreshPlaylist()
         {
-            _refreshPlaylistActive = true;
-            _refreshPlaylist.RaiseCanExecuteChanged();
-
-            //todo: check if already actualizing playlist
-            SelectedPlaylist.ProgressService = new ProgressService();
-            await _playlistRepository.RefreshPlaylist(SelectedPlaylist, SelectedPlaylist.ProgressService);
-
-            _refreshPlaylistActive = false;
-            _refreshPlaylist.RaiseCanExecuteChanged();
+            using (new IndeterminateProgressDisposable<IndeterminateProgressKey>(_refreshPlaylist, b => _refreshPlaylistActive = b, IndeterminateProgressKey.RefreshingPlaylists, _progressService))
+            {
+                SelectedPlaylist.ProgressService = new ProgressService();
+                await _playlistRepository.RefreshPlaylist(SelectedPlaylist, SelectedPlaylist.ProgressService);
+            }
         }
 
         private readonly RelayCommand _startDownload;
@@ -67,16 +66,13 @@ namespace Famoser.YoutubePlaylistDownloader.View.ViewModels
         private bool _startDownloadActive;
         public async void StartDownload()
         {
-            _startDownloadActive = true;
-            _startDownload.RaiseCanExecuteChanged();
-
-            SelectedPlaylist.ProgressService = new ProgressService();
-            await _playlistRepository.DownloadVideosForPlaylist(SelectedPlaylist, SelectedPlaylist.ProgressService);
-
-            _startDownloadActive = false;
-            _startDownload.RaiseCanExecuteChanged();
+            using (new IndeterminateProgressDisposable<IndeterminateProgressKey>(_startDownload, b => _startDownloadActive = b, IndeterminateProgressKey.StartingDownload, _progressService))
+            {
+                SelectedPlaylist.ProgressService = new ProgressService();
+                await _playlistRepository.DownloadVideosForPlaylist(SelectedPlaylist, SelectedPlaylist.ProgressService);
+            }
         }
-        
+
         private readonly RelayCommand<VideoModel> _selectVideo;
         public ICommand SelectVideoCommand => _selectVideo;
 

@@ -1,5 +1,7 @@
 ﻿using System.Windows.Input;
 using Famoser.FrameworkEssentials.Services;
+using Famoser.FrameworkEssentials.Services.Interfaces;
+using Famoser.FrameworkEssentials.View.Commands;
 using Famoser.YoutubePlaylistDownloader.Business.Models;
 using Famoser.YoutubePlaylistDownloader.Business.Repositories.Interfaces;
 using Famoser.YoutubePlaylistDownloader.View.Enums;
@@ -13,10 +15,12 @@ namespace Famoser.YoutubePlaylistDownloader.View.ViewModels
     public class VideoViewModel : ViewModelBase
     {
         private readonly IVideoRespository _videoRespository;
+        private readonly IProgressService _progressService;
 
-        public VideoViewModel(IVideoRespository videoRespository)
+        public VideoViewModel(IVideoRespository videoRespository, IProgressService progressService)
         {
             _videoRespository = videoRespository;
+            _progressService = progressService;
 
             _saveFile = new RelayCommand(SaveFile, () => CanExecuteSaveFileCommand);
             _addNewPicture = new RelayCommand<byte[]>(AddNewPicture, CanExecuteAddNewPictureCommand);
@@ -42,27 +46,14 @@ namespace Famoser.YoutubePlaylistDownloader.View.ViewModels
         private bool _saveFileActive;
         public async void SaveFile()
         {
-            ChangeIsFileActive(true);
-
-            //todo: check status of file
-            SelectedVideo.ProgressService = new ProgressService();
-            await _videoRespository.SaveToMusicLibrary(SelectedVideo);
-
-            ChangeIsFileActive(false);
-        }
-
-        private void ChangeIsFileActive(bool newStatus)
-        {
-            _saveFileActive = newStatus;
-            try
+            using (new IndeterminateProgressDisposable<IndeterminateProgressKey>(_saveFile, b => _saveFileActive = b, IndeterminateProgressKey.SavingFile, _progressService))
             {
-                _saveFile.RaiseCanExecuteChanged();
                 _addNewPicture.RaiseCanExecuteChanged();
+
+                SelectedVideo.ProgressService = new ProgressService();
+                await _videoRespository.SaveToMusicLibrary(SelectedVideo);
             }
-            catch
-            {
-                // ignored
-            }
+            _addNewPicture.RaiseCanExecuteChanged();
         }
 
         private readonly RelayCommand<byte[]> _addNewPicture;
@@ -72,14 +63,16 @@ namespace Famoser.YoutubePlaylistDownloader.View.ViewModels
         {
             return !_saveFileActive && bytes != null && bytes.Length > 0;
         }
-        
+
         public void AddNewPicture(byte[] bytes)
         {
-            ChangeIsFileActive(true);
-            
-            SelectedVideo.Mp3Model.AlbumCover = bytes;
+            using (new IndeterminateProgressDisposable<IndeterminateProgressKey>(_saveFile, b => _saveFileActive = b, IndeterminateProgressKey.AddingNewPicture, _progressService))
+            {
+                _addNewPicture.RaiseCanExecuteChanged();
+                SelectedVideo.Mp3Model.AlbumCover = bytes;
 
-            ChangeIsFileActive(false);
+            }
+            _addNewPicture.RaiseCanExecuteChanged();
         }
 
         private VideoModel _selectedVideo;
