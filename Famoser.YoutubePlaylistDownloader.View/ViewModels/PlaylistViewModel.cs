@@ -86,7 +86,11 @@ namespace Famoser.YoutubePlaylistDownloader.View.ViewModels
         public PlaylistModel SelectedPlaylist
         {
             get { return _selectedPlaylist; }
-            set { Set(ref _selectedPlaylist, value); }
+            set
+            {
+                if (Set(ref _selectedPlaylist, value))
+                    _playlistRepository.DownloadVideosForPlaylist(_selectedPlaylist, _progressService);
+            }
         }
     }
 }

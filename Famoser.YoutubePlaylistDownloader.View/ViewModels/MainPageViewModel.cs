@@ -63,10 +63,13 @@ namespace Famoser.YoutubePlaylistDownloader.View.ViewModels
         private bool _prozessActive;
         public async void StartDownload()
         {
-            using (new IndeterminateProgressDisposable<IndeterminateProgressKey>(_refreshPlaylists, b => _prozessActive = b, IndeterminateProgressKey.StartingDownload, _progressService))
+            using (new IndeterminateProgressDisposable<IndeterminateProgressKey>(_startDownload, b => _prozessActive = b, IndeterminateProgressKey.StartingDownload, _progressService))
             {
+                _refreshPlaylists.RaiseCanExecuteChanged();
+
                 await _playlistRepository.DownloadVideosForAllPlaylists(_progressService);
             }
+            _refreshPlaylists.RaiseCanExecuteChanged();
         }
 
 

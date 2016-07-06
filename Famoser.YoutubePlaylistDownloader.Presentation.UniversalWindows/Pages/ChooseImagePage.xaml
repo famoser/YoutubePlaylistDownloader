@@ -40,7 +40,7 @@
     <Page.BottomAppBar>
         <CommandBar>
             <CommandBar.PrimaryCommands>
-                <AppBarButton Icon="Save" Command="{Binding SaveFileCommand}" />
+                <AppBarButton Icon="Save" Command="{Binding SaveFileCommand}" Label="Save" />
             </CommandBar.PrimaryCommands>
         </CommandBar>
     </Page.BottomAppBar>

@@ -40,8 +40,8 @@
     <Page.BottomAppBar>
         <CommandBar>
             <CommandBar.PrimaryCommands>
-                <AppBarButton Icon="Refresh" Command="{Binding RefreshPlaylistsCommand}" />
-                <AppBarButton Icon="Download" Command="{Binding StartDownloadCommand}" />
+                <AppBarButton Icon="Refresh" Command="{Binding RefreshPlaylistsCommand}" Label="Refresh All" />
+                <AppBarButton Icon="Download" Command="{Binding StartDownloadCommand}" Label="Download All" />
             </CommandBar.PrimaryCommands>
         </CommandBar>
     </Page.BottomAppBar>
