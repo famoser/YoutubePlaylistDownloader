@@ -15,7 +15,7 @@
         <converters:SaveStatusVisibilityConverter x:Key="SaveStatusVisibilityConverter" />
         
         <DataTemplate x:Key="VideoDataTemplate">
-            <Grid>
+            <Grid Padding="0,10">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
@@ -27,13 +27,13 @@
                     </Grid.ColumnDefinitions>
                     <TextBlock VerticalAlignment="Center" Style="{ThemeResource SecondaryBigTexBlock}" Grid.Column="0" Text="{Binding Name}" />
                 </Grid>
-                <Grid Grid.Row="1" Padding="10,0,10,20" Visibility="{Binding SaveStatus, Converter={StaticResource SaveStatusVisibilityConverter}}">
+                <Grid Grid.Row="1" Padding="10,0,10,0" Visibility="{Binding SaveStatus, Converter={StaticResource SaveStatusVisibilityConverter}}">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
                     <TextBlock Text="{Binding SaveStatus, Converter={StaticResource SaveStatusConverter}}" />
-                    <progressModel:ProgressModelBar Grid.Row="1" DataContext="{Binding }" />
+                    <progressModel:PercentageProgressBar Grid.Row="1" DataContext="{Binding ProgressService}" />
                 </Grid>
             </Grid>
         </DataTemplate>
@@ -44,8 +44,8 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
+        <progressModel:GlobalProgressBar Grid.Row="0" VerticalAlignment="Top" />
         <TextBlock Grid.Row="0" Text="{Binding SelectedPlaylist.Name}" Style="{StaticResource BigTexBlock}" />
-        <ProgressBar Grid.Row="0" Visibility="{Binding SelectedPlaylist.ProgressService.AnyProgressActive, Converter={StaticResource BoolToVisbilityConverter}}" Value="{Binding SelectedPlaylist.ProgressService.PercentageProgressActiveValue, Mode=TwoWay}" VerticalAlignment="Top" Maximum="{Binding SelectedPlaylist.ProgressService.PercentageProgressMaxValue}" Minimum="0" IsIndeterminate="{Binding SelectedPlaylist.ProgressService.IndeterminateProgressActive}"/>
         <ListView IsItemClickEnabled="True" ItemClick="ListViewBase_OnItemClick" SelectionMode="None" Grid.Row="1" ItemContainerStyle="{ThemeResource StretchListViewItemStyle}" ItemsSource="{Binding SelectedPlaylist.Videos}" ItemTemplate="{StaticResource VideoDataTemplate}" />
     </Grid>
 

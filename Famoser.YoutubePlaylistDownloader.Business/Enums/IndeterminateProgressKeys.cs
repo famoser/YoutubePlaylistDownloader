@@ -10,6 +10,7 @@
         StartingDownload,
         SavingFile,
         AddingNewPicture,
-        AddingToPlaylist
+        AddingToPlaylist,
+        SavingCache
     }
 }

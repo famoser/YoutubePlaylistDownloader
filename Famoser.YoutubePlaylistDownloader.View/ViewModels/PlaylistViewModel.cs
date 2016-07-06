@@ -47,12 +47,12 @@ namespace Famoser.YoutubePlaylistDownloader.View.ViewModels
         private readonly RelayCommand _refreshPlaylist;
         public ICommand RefreshPlaylistCommand => _refreshPlaylist;
 
-        public bool CanExecuteRefreshPlaylistCommand => !_refreshPlaylistActive;
+        public bool CanExecuteRefreshPlaylistCommand => !RefreshPlaylistActive;
 
-        private bool _refreshPlaylistActive;
+        private bool RefreshPlaylistActive { get; set; }
         public async void RefreshPlaylist()
         {
-            using (new IndeterminateProgressDisposable<IndeterminateProgressKeys, object>(_refreshPlaylist, b => _refreshPlaylistActive = b, IndeterminateProgressKeys.RefreshingPlaylists, _progressService))
+            using (new IndeterminateProgressDisposable<IndeterminateProgressKeys, object>(_refreshPlaylist, b => RefreshPlaylistActive = b, IndeterminateProgressKeys.RefreshingPlaylists, _progressService))
             {
                 await _playlistRepository.RefreshPlaylist(SelectedPlaylist);
             }
@@ -61,12 +61,12 @@ namespace Famoser.YoutubePlaylistDownloader.View.ViewModels
         private readonly RelayCommand _startDownload;
         public ICommand StartDownloadCommand => _startDownload;
 
-        public bool CanExecuteStartDownloadCommand => SelectedPlaylist != null && !_startDownloadActive;
+        public bool CanExecuteStartDownloadCommand => SelectedPlaylist != null && !StartDownloadActive;
 
-        private bool _startDownloadActive;
+        private bool StartDownloadActive { get; set; }
         public async void StartDownload()
         {
-            using (new IndeterminateProgressDisposable<IndeterminateProgressKeys, object>(_startDownload, b => _startDownloadActive = b, IndeterminateProgressKeys.StartingDownload, _progressService))
+            using (new IndeterminateProgressDisposable<IndeterminateProgressKeys, object>(_startDownload, b => StartDownloadActive = b, IndeterminateProgressKeys.StartingDownload, _progressService))
             {
                 await _playlistRepository.DownloadVideosForPlaylist(SelectedPlaylist);
             }

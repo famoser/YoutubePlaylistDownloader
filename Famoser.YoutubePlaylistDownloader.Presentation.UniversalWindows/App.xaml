@@ -5,14 +5,16 @@
     xmlns:local="using:Famoser.YoutubePlaylistDownloader.Presentation.UniversalWindows"
     xmlns:viewModels="using:Famoser.YoutubePlaylistDownloader.Presentation.UniversalWindows.ViewModels"
     xmlns:visibility="using:Famoser.FrameworkEssentials.UniversalWindows.Converters.Visibility"
+    xmlns:converters="using:Famoser.YoutubePlaylistDownloader.Presentation.UniversalWindows.Converters"
     RequestedTheme="Light">
     <Application.Resources>
         <ResourceDictionary>
             <viewModels:ViewModelLocator x:Key="Locator" />
 
             <visibility:BoolToVisibilityConverter x:Key="BoolToVisbilityConverter" />
-            <visibility:ReferenceToVisibilityConverter x:Key="ReferenceToVisibilityConverter" /> 
+            <visibility:ReferenceToVisibilityConverter x:Key="ReferenceToVisibilityConverter" />
 
+            <converters:ProgressVisibilityServiceConverter x:Key="ProgressVisibilityServiceConverter" />
 
             <Style x:Key="StretchListViewItemStyle" TargetType="ListViewItem">
                 <Setter Property="HorizontalContentAlignment" Value="Stretch" />
@@ -45,7 +47,7 @@
                 <Setter Property="FontFamily" Value="Segoe UI" />
                 <Setter Property="FontWeight" Value="Light" />
                 <Setter Property="TextWrapping" Value="Wrap" />
-                <Setter Property="Padding" Value="10,0,10,10" />
+                <Setter Property="Padding" Value="10,0,10,0" />
                 <Setter Property="Opacity" Value="0.6" />
             </Style>
 
@@ -77,7 +79,7 @@
             </Style>
 
             <Style x:Key="FlatChekbox" TargetType="CheckBox">
-                <Setter Property="Margin" Value="10,0,10,10" />
+                <Setter Property="Margin" Value="10,12,10,10" />
             </Style>
 
             <Style x:Key="FlatTextBox" TargetType="TextBox">

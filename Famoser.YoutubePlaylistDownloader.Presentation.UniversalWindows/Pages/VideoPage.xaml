@@ -6,6 +6,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:converters="using:Famoser.YoutubePlaylistDownloader.Presentation.UniversalWindows.Converters"
+    xmlns:progressModel="using:Famoser.YoutubePlaylistDownloader.Presentation.UniversalWindows.UserControls.ProgressModel"
     mc:Ignorable="d"
     DataContext="{Binding VideoViewModel, Source={StaticResource Locator}}">
 
@@ -20,14 +21,13 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
+        <progressModel:GlobalProgressBar Grid.Row="0" VerticalAlignment="Top" />
         <TextBlock Grid.Row="0" Text="{Binding SelectedVideo.Name}" Style="{StaticResource BigTexBlock}" />
-        <ProgressBar Grid.Row="0" Visibility="{Binding SelectedVideo.ProgressService.AnyProgressActive, Converter={StaticResource BoolToVisbilityConverter}}" Value="{Binding SelectedVideo.ProgressService.PercentageProgressActiveValue, Mode=TwoWay}" VerticalAlignment="Top" Maximum="{Binding SelectedPlaylist.ProgressService.PercentageProgressMaxValue}" Minimum="0" IsIndeterminate="{Binding SelectedVideo.ProgressService.IndeterminateProgressActive}"/>
         <Grid Grid.Row="1">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
-
             <ScrollViewer Grid.Row="1">
                 <StackPanel>
                     <Image MaxHeight="300" Stretch="Uniform" HorizontalAlignment="Center" Source="{Binding SelectedVideo.Mp3Model.AlbumCover, Converter={StaticResource ByteToBitmapConverter}}" />

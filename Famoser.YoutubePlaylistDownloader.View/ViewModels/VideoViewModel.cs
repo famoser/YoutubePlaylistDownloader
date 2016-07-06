@@ -42,12 +42,12 @@ namespace Famoser.YoutubePlaylistDownloader.View.ViewModels
 
         private readonly RelayCommand _saveFile;
         public ICommand SaveFileCommand => _saveFile;
-        private bool CanExecuteSaveFileCommand => SelectedVideo != null && !_saveFileActive;
+        private bool CanExecuteSaveFileCommand => SelectedVideo != null && !SaveFileActive;
 
-        private bool _saveFileActive;
+        private bool SaveFileActive { get; set; }
         public async void SaveFile()
         {
-            using (new IndeterminateProgressDisposable<IndeterminateProgressKeys, object>(_saveFile, b => _saveFileActive = b, IndeterminateProgressKeys.SavingFile, _progressService))
+            using (new IndeterminateProgressDisposable<IndeterminateProgressKeys, object>(_saveFile, b => SaveFileActive = b, IndeterminateProgressKeys.SavingFile, _progressService))
             {
                 _addNewPicture.RaiseCanExecuteChanged();
                 
@@ -61,12 +61,12 @@ namespace Famoser.YoutubePlaylistDownloader.View.ViewModels
 
         private bool CanExecuteAddNewPictureCommand(byte[] bytes)
         {
-            return !_saveFileActive && bytes != null && bytes.Length > 0;
+            return !SaveFileActive && bytes != null && bytes.Length > 0;
         }
 
         public void AddNewPicture(byte[] bytes)
         {
-            using (new IndeterminateProgressDisposable<IndeterminateProgressKeys, object>(_saveFile, b => _saveFileActive = b, IndeterminateProgressKeys.AddingNewPicture, _progressService))
+            using (new IndeterminateProgressDisposable<IndeterminateProgressKeys, object>(_saveFile, b => SaveFileActive = b, IndeterminateProgressKeys.AddingNewPicture, _progressService))
             {
                 _addNewPicture.RaiseCanExecuteChanged();
                 SelectedVideo.Mp3Model.AlbumCover = bytes;

@@ -34,52 +34,54 @@ namespace Famoser.YoutubePlaylistDownloader.Business.Repositories
         {
             return Execute(async () =>
             {
-                var model = videoModel.Mp3Model;
-                var file = await _folderStorageService.GetTagLibFile(Type, model.FilePath);
-                var tagFile = File.Create(file);
-
-                model.Title = tagFile.Tag.Title;
-                model.Album = tagFile.Tag.Album;
-                model.Artist = string.Join(", ", tagFile.Tag.Performers);
-                model.AlbumArtist = string.Join(", ", tagFile.Tag.AlbumArtists);
-                model.Genre = string.Join(", ", tagFile.Tag.Genres);
-                model.Year = tagFile.Tag.Year;
-
-                model.Track = tagFile.Tag.Track;
-                model.TrackCount = tagFile.Tag.TrackCount;
-
-                model.FileInfo = new Mp3FileInfo
+                if (videoModel.Mp3Model != null)
                 {
-                    Duration = tagFile.Properties.Duration,
-                    AudioBitrate = tagFile.Properties.AudioBitrate
-                };
+                    var model = videoModel.Mp3Model;
+                    var file = await _folderStorageService.GetTagLibFile(Type, model.FilePath);
+                    var tagFile = File.Create(file);
 
-                // save meta data
-                var id3Tag = tagFile.GetTag(TagTypes.Id3v2);
-                if (id3Tag is TagLib.Id3v2.Tag)
-                {
-                    try
+                    model.Title = tagFile.Tag.Title;
+                    model.Album = tagFile.Tag.Album;
+                    model.Artist = string.Join(", ", tagFile.Tag.Performers);
+                    model.AlbumArtist = string.Join(", ", tagFile.Tag.AlbumArtists);
+                    model.Genre = string.Join(", ", tagFile.Tag.Genres);
+                    model.Year = tagFile.Tag.Year;
+
+                    model.Track = tagFile.Tag.Track;
+                    model.TrackCount = tagFile.Tag.TrackCount;
+
+                    model.FileInfo = new Mp3FileInfo
                     {
-                        PrivateFrame mp3Json = PrivateFrame.Get(id3Tag as TagLib.Id3v2.Tag, "ypdjson", false);
-                        var json = Encoding.Unicode.GetString(mp3Json.PrivateData.Data, 0,
-                            mp3Json.PrivateData.Data.Length);
-                        var metaData = JsonConvert.DeserializeObject<Mp3FileMetaData>(json);
-                        model.FileInfo.SaveDate = metaData.SaveDate;
-                        model.FileInfo.SaveProgramVersion = metaData.SaveProgramVersion;
-                        model.FileInfo.CreatedProgramVersion = metaData.CreatedProgramVersion;
-                        model.FileInfo.CreateDate = metaData.CreateDate;
-                    }
-                    catch (Exception ex)
+                        Duration = tagFile.Properties.Duration,
+                        AudioBitrate = tagFile.Properties.AudioBitrate
+                    };
+
+                    // save meta data
+                    var id3Tag = tagFile.GetTag(TagTypes.Id3v2);
+                    if (id3Tag is TagLib.Id3v2.Tag)
                     {
-                        LogHelper.Instance.LogException(ex);
+                        Execute(() =>
+                        {
+                            PrivateFrame mp3Json = PrivateFrame.Get(id3Tag as TagLib.Id3v2.Tag, "ypdjson", false);
+                            var json = Encoding.Unicode.GetString(mp3Json.PrivateData.Data, 0,
+                                mp3Json.PrivateData.Data.Length);
+                            var metaData = JsonConvert.DeserializeObject<Mp3FileMetaData>(json);
+                            model.FileInfo.SaveDate = metaData.SaveDate;
+                            model.FileInfo.SaveProgramVersion = metaData.SaveProgramVersion;
+                            model.FileInfo.CreatedProgramVersion = metaData.CreatedProgramVersion;
+                            model.FileInfo.CreateDate = metaData.CreateDate;
+
+                            return true;
+                        });
                     }
+
+                    var pic = tagFile.Tag.Pictures?.FirstOrDefault();
+                    if (pic != null)
+                        model.AlbumCover = pic.Data.Data;
+
+                    return true;
                 }
-
-                var pic = tagFile.Tag.Pictures?.FirstOrDefault();
-                if (pic != null)
-                    model.AlbumCover = pic.Data.Data;
-
-                return true;
+                return false;
             });
         }
 

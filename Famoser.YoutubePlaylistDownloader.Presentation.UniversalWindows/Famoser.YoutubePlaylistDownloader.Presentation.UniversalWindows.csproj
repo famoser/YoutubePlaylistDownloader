@@ -129,8 +129,11 @@
     <Compile Include="Platform\PlatformService.cs" />
     <Compile Include="Platform\StreamFileAbstraction.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="UserControls\ProgressModel\ProgressModelBar.xaml.cs">
-      <DependentUpon>ProgressModelBar.xaml</DependentUpon>
+    <Compile Include="UserControls\ProgressModel\GlobalProgressBar.xaml.cs">
+      <DependentUpon>GlobalProgressBar.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UserControls\ProgressModel\PercentageProgressBar.xaml.cs">
+      <DependentUpon>PercentageProgressBar.xaml</DependentUpon>
     </Compile>
     <Compile Include="ViewModels\ViewModelLocator.cs" />
   </ItemGroup>
@@ -171,7 +174,11 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="UserControls\ProgressModel\ProgressModelBar.xaml">
+    <Page Include="UserControls\ProgressModel\GlobalProgressBar.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UserControls\ProgressModel\PercentageProgressBar.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

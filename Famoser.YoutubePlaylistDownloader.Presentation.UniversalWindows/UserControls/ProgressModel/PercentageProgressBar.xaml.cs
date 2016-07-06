@@ -17,9 +17,9 @@ using Windows.UI.Xaml.Navigation;
 
 namespace Famoser.YoutubePlaylistDownloader.Presentation.UniversalWindows.UserControls.ProgressModel
 {
-    public sealed partial class ProgressModelBar : UserControl
+    public sealed partial class PercentageProgressBar : UserControl
     {
-        public ProgressModelBar()
+        public PercentageProgressBar()
         {
             this.InitializeComponent();
         }

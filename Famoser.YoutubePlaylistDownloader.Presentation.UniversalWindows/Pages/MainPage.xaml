@@ -5,24 +5,25 @@
     xmlns:local="using:Famoser.YoutubePlaylistDownloader.Presentation.UniversalWindows"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:progressModel="using:Famoser.YoutubePlaylistDownloader.Presentation.UniversalWindows.UserControls.ProgressModel"
     mc:Ignorable="d"
     DataContext="{Binding MainPageViewModel, Source={StaticResource Locator}}">
 
     <Page.Resources>
         <DataTemplate x:Key="PlaylistDataTemplate">
-            <Grid>
+            <Grid Padding="0,10">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="40" />
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="40" />
                 </Grid.ColumnDefinitions>
-                <CheckBox Grid.Column="0" Style="{StaticResource FlatChekbox}" IsChecked="{Binding Refresh, Mode=TwoWay}" />
-                <TextBlock VerticalAlignment="Center" Style="{ThemeResource SecondaryBigTexBlock}" Grid.Column="1" Text="{Binding Name}" />
-                <!--<Button Grid.Column="2" Style="{StaticResource FlatButton}" Command="{Binding MainPageViewModel.SelectPlaylistCommand, Source={StaticResource Locator}}" CommandParameter="{Binding }">
-                    <Button.Content>
-                        <SymbolIcon Symbol="Forward" />
-                    </Button.Content>
-                </Button>-->
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <CheckBox Grid.Row="0" Grid.Column="0" Style="{StaticResource FlatChekbox}" IsChecked="{Binding Refresh, Mode=TwoWay}" />
+                <TextBlock Grid.Row="0" VerticalAlignment="Center" Style="{ThemeResource SecondaryBigTexBlock}" Grid.Column="1" Text="{Binding Name}" />
+                <progressModel:PercentageProgressBar Grid.Column="1" Grid.Row="1" DataContext="{Binding ProgressService}" />
             </Grid>
         </DataTemplate>
     </Page.Resources>
@@ -32,14 +33,15 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
+        <progressModel:GlobalProgressBar Grid.Row="0" VerticalAlignment="Top" />
         <TextBlock Grid.Row="0" Text="Youtube Playlist Downloader" Style="{StaticResource BigTexBlock}" />
-        <ProgressBar Grid.Row="0" Visibility="{Binding ProgressService.AnyProgressActive, Converter={StaticResource BoolToVisbilityConverter}}" Value="{Binding ProgressService.PercentageProgressActiveValue, Mode=TwoWay}" VerticalAlignment="Top" Maximum="{Binding ProgressService.PercentageProgressMaxValue}" Minimum="0" IsIndeterminate="{Binding ProgressService.IndeterminateProgressActive}"/>
         <ListView IsItemClickEnabled="True" SelectionMode="None" Grid.Row="1" ItemClick="ListViewBase_OnItemClick" ItemContainerStyle="{ThemeResource StretchListViewItemStyle}" ItemsSource="{Binding Playlists}" ItemTemplate="{StaticResource PlaylistDataTemplate}" />
     </Grid>
 
     <Page.BottomAppBar>
         <CommandBar>
             <CommandBar.PrimaryCommands>
+                <AppBarButton Icon="Save" Command="{Binding SaveCacheCommand}" Label="Save Cache" />
                 <AppBarButton Icon="Refresh" Command="{Binding RefreshPlaylistsCommand}" Label="Refresh All" />
                 <AppBarButton Icon="Download" Command="{Binding StartDownloadCommand}" Label="Download All" />
             </CommandBar.PrimaryCommands>
